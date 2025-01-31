@@ -111,24 +111,10 @@ import React, { useEffect, useState, useRef } from 'react';
       const filteredProjects = projects.filter(project => {
         const isArchive = showArchive && (project.status === 'completed' || project.status === 'abandonded');
         const isNotArchived =
-          !showArchive &&
-          (selectedCategory === 'all'
-            ? project.status !== 'abandonded' && project.status !== 'completed'
-            : project.status !== 'abandonded');
+          !showArchive && (project.status === 'started' || project.status === 'concept');
 
         const categoryMatch = selectedCategory === 'all' || project.categories === selectedCategory;
         const tagMatch = !selectedTag || project.tags.split(',').map(tag => tag.trim()).includes(selectedTag);
-
-        if (selectedCategory === 'all') {
-          return (
-            tagMatch &&
-            (isArchive ||
-              isNotArchived ||
-              project.status === 'completed' ||
-              project.status === 'concept' ||
-              project.status === 'started')
-          );
-        }
 
         return (
           categoryMatch &&
