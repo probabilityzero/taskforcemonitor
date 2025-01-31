@@ -56,7 +56,7 @@ import React, { useRef } from 'react';
                                         setKey(prev => prev + 1)
                                     }}
                                     className={cn(
-                                        "relative flex items-center gap-1 md:gap-2 px-2 py-1 rounded-md transition-colors z-10 text-sm",
+                                        "relative flex items-center gap-1 md:gap-2 px-2 py-1 rounded-md transition-colors z-10 text-sm md:text-base",
                                         selectedCategory === category.id
                                             ? "text-white bg-github-green"
                                             : "bg-github-card text-github-text border border-github-border hover:border-github-green",
@@ -86,14 +86,15 @@ import React, { useRef } from 'react';
                             transition={{ duration: 0.2 }}
                         >
                             <div className="p-2 flex flex-col md:flex-row items-start md:items-center">
-                                <div className="flex items-center gap-2 mb-2 md:mb-0">
+                                <div className="flex items-center gap-1 mb-1 md:mb-0">
                                     <Archive className="text-github-text" size={14} />
-                                    <span className="text-github-text text-sm">Show Archive</span>
+                                    <span className="text-github-text text-sm md:text-base">Show Archive</span>
                                     <button
                                         onClick={() => setShowArchive(!showArchive)}
                                         className={cn(
-                                            "relative ml-2 inline-flex h-5 w-9 items-center rounded-full transition-colors",
-                                            showArchive ? "bg-github-green" : "bg-github-border"
+                                            "relative ml-1 inline-flex h-5 w-9 items-center rounded-full transition-colors",
+                                            showArchive ? "bg-github-green" : "bg-github-border",
+                                            showArchive && "bg-github-green"
                                         )}
                                     >
                                         <span
@@ -104,8 +105,8 @@ import React, { useRef } from 'react';
                                         />
                                     </button>
                                 </div>
-                                <div className="md:border-l md:border-github-border md:mx-2 md:h-5 flex-1">
-                                  <div className="flex flex-wrap gap-1 p-2 md:p-0">
+                                <div className="flex-1">
+                                  <div className="flex flex-wrap gap-1 p-2 md:p-0 items-center mt-1 md:mt-0 md:ml-4">
                                       {Object.entries(tagCounts).map(([tag, count]) => (
                                           <button
                                               key={tag}
@@ -113,7 +114,7 @@ import React, { useRef } from 'react';
                                                   setSelectedTag(tag);
                                               }}
                                               className={cn(
-                                                  "px-2 py-1 rounded-full text-xs text-github-text border border-github-border",
+                                                  "px-1 py-0.5 rounded-full text-xs text-github-text border border-github-border",
                                                   selectedTag === tag ? 'bg-github-green text-white' : 'bg-[#21262d]'
                                               )}
                                           >

@@ -74,12 +74,7 @@ import React, { useState, useRef, useEffect } from 'react';
           transition={{ duration: 0.15 }}
           layout
         >
-          <button
-            onClick={onClose}
-            className="absolute right-3 top-3 text-github-text hover:text-white transition-colors"
-          >
-            <X size={16} md:size={20} />
-          </button>
+          
           
           <h2 className="text-xl font-bold mb-3 md:mb-4 text-github-text">
             {project ? 'Edit Project' : 'Add Project'}

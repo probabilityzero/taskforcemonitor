@@ -36,9 +36,9 @@ import React, { useState } from 'react';
                 onEdit(project)
               }}
               className={cn(
-                "flex items-center gap-1 px-1 py-1 rounded text-xs",
+                "flex items-center gap-1 px-1 py-1 rounded text-xs md:text-sm",
                 {
-                  'bg-[#21262d] text-github-text': project.status === 'concept',
+                  'bg-[#b388eb] text-white': project.status === 'concept',
                   'bg-[#238636] text-white': project.status === 'started',
                   'bg-[#1f6feb] text-white': project.status === 'completed',
                   'bg-[#6c757d] text-white': project.status === 'abandonded',
@@ -46,7 +46,7 @@ import React, { useState } from 'react';
               )}
             >
               {statusOptions[project.status]?.icon}
-              {statusOptions[project.status]?.label}
+              <span className="md:inline">{statusOptions[project.status]?.label}</span>
             </button>
           </div>
           
