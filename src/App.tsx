@@ -6,6 +6,7 @@ import { ProjectForm } from './components/ProjectForm';
 import type { Project, ProjectCategory } from './types';
 import { cn } from './lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+// import { ReactComponent as Logo } from './assets/logo.svg?react';
 
 const categories: { id: ProjectCategory | 'all'; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'All Projects', icon: <Folder className="w-5 h-5" /> },
@@ -22,6 +23,7 @@ function App() {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const categoryRef = useRef<HTMLDivElement>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -104,8 +106,9 @@ function App() {
     <div className="min-h-screen bg-github-bg">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-github-text">
-            Task Force Monitor
+          <h1 className="text-3xl font-bold text-github-text flex items-center gap-2">
+            {/* <Logo className="w-8 h-8" /> */}
+            Task Force <span className="font-thin">Monitor</span>
           </h1>
           <button
             onClick={() => {
@@ -169,6 +172,8 @@ function App() {
                       setIsFormOpen(true);
                     }}
                     onToggleStarted={handleToggleStarted}
+                    onStatusChange={handleToggleStarted}
+                    setToast={setToast}
                   />
                 </motion.div>
               ))}
@@ -198,6 +203,18 @@ function App() {
             </motion.div>
           )}
         </AnimatePresence>
+        {toast && (
+          <motion.div
+            className="fixed top-4 left-4 bg-github-card p-4 rounded-md border border-github-border text-github-text z-50"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+            onAnimationComplete={() => setTimeout(() => setToast(null), 3000)}
+          >
+            {toast}
+          </motion.div>
+        )}
       </div>
     </div>
   );

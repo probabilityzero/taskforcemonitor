@@ -126,38 +126,7 @@ export function ProjectForm({ project, onSubmit, onClose, categories }: ProjectF
           />
         </div>
         
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1 text-github-text">Tags</label>
-          <div className="relative">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={handleTagInputChange}
-              onKeyDown={handleTagInputKeyDown}
-              placeholder=""
-              className="w-full p-2 rounded-md border"
-            />
-            <div className="absolute top-0 left-0 pointer-events-none p-2 flex flex-wrap gap-1">
-              {tagList.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-2 py-1 bg-[#21262d] rounded-full text-sm text-github-text border border-github-border flex items-center gap-1"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(index)}
-                    className="text-github-text hover:text-white transition-colors"
-                  >
-                    <X size={12} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
         
-        <hr className="border-github-border mb-4" />
         
         <div className="flex items-center justify-between mb-4">
           <label className="block text-sm font-medium text-github-text">Status</label>
@@ -190,6 +159,39 @@ export function ProjectForm({ project, onSubmit, onClose, categories }: ProjectF
             </motion.div>
           )}
         </AnimatePresence>
+        
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 text-github-text">Tags</label>
+          <div className="relative">
+            <input
+              type="text"
+              value={tagInput}
+              onChange={handleTagInputChange}
+              onKeyDown={handleTagInputKeyDown}
+              placeholder=""
+              className="w-full p-2 rounded-md border"
+            />
+            <div className="absolute top-0 left-0 pointer-events-none p-2 flex flex-wrap gap-1">
+              {tagList.map((tag, index) => (
+                <span
+                  key={index}
+                  className="px-2 py-1 bg-[#21262d] rounded-full text-sm text-github-text border border-github-border flex items-center gap-1"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(index)}
+                    className="text-github-text hover:text-white transition-colors"
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        <hr className="border-github-border mb-4" />
         
         
         
