@@ -9,14 +9,15 @@ interface ProjectCardProps {
   onToggleStarted: (project: Project) => void;
   onStatusChange: (project: Project) => void;
   setToast: (message: string | null) => void;
+    onTagClick: (tag: string) => void;
 }
 
-export function ProjectCard({ project, onEdit, onToggleStarted, onStatusChange, setToast }: ProjectCardProps) {
+export function ProjectCard({ project, onEdit, onToggleStarted, onStatusChange, setToast, onTagClick }: ProjectCardProps) {
   const statusOptions = {
-    'idea': { label: 'IDEA', icon: <Lightbulb size={16} />, color: '#c9d1d9' },
-    'started': { label: 'STARTED', icon: <PlayCircle size={16} />, color: '#238636' },
-    'completed': { label: 'COMPLETED', icon: <CheckCircle size={16} />, color: '#1f6feb' },
-    'abandonded': { label: 'ABANDONED', icon: <Flag size={16} />, color: '#da3633' },
+    'concept': { label: 'Concept', icon: <Lightbulb size={14} />, color: '#b388eb' },
+    'started': { label: 'Started', icon: <PlayCircle size={14} />, color: '#238636' },
+    'completed': { label: 'Completed', icon: <CheckCircle size={14} />, color: '#1f6feb' },
+    'abandonded': { label: 'Abandoned', icon: <Flag size={14} />, color: '#6c757d' },
   };
 
   return (
@@ -27,31 +28,40 @@ export function ProjectCard({ project, onEdit, onToggleStarted, onStatusChange, 
     )}>
       <div className="flex justify-between items-start mb-2">
         <h3 className="text-lg font-semibold text-github-text">{project.name}</h3>
-        <div className="flex gap-2 items-center">
-          <button
-            onClick={() => onEdit(project)}
-            className="text-github-text hover:text-github-blue transition-colors"
-          >
-            <Edit2 size={16} />
-          </button>
+        <button
+          onClick={async () => {
+            onEdit(project)
+          }}
+          className={cn(
+            "flex items-center gap-1 px-1 py-1 rounded text-xs",
+            {
+              'bg-[#21262d] text-github-text': project.status === 'concept',
+              'bg-[#238636] text-white': project.status === 'started',
+              'bg-[#1f6feb] text-white': project.status === 'completed',
+              'bg-[#6c757d] text-white': project.status === 'abandonded',
+            }
+          )}
+        >
+          {statusOptions[project.status]?.icon}
+          {statusOptions[project.status]?.label}
+        </button>
+      </div>
+      
+      <p className="text-github-text mb-4 text-sm">{project.description}</p>
+      
+      <div className="flex justify-between items-center" style={{ marginBottom: '4px' }}>
+        <div className="flex flex-wrap gap-1">
+          {project.tags.split(',').map((tag, index) => (
+            <button
+              key={index}
+                onClick={() => onTagClick(tag.trim())}
+              className="px-2 py-1 bg-[#21262d] rounded-full text-xs text-github-text border border-github-border"
+            >
+              {tag.trim()}
+            </button>
+          ))}
         </div>
-      </div>
-      
-      <p className="text-github-text mb-2 text-sm">{project.description}</p>
-      
-      <div className="flex flex-wrap gap-1 mb-2">
-        {project.tags.split(',').map((tag, index) => (
-          <span
-            key={index}
-            className="px-2 py-1 bg-[#21262d] rounded-full text-xs text-github-text border border-github-border"
-          >
-            {tag.trim()}
-          </span>
-        ))}
-      </div>
-      
-      <div className="flex justify-between items-center text-sm">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-sm">
           {project.status === 'completed' ? (
             project.link && (
               <a
@@ -70,24 +80,6 @@ export function ProjectCard({ project, onEdit, onToggleStarted, onStatusChange, 
             </span>
           )}
         </div>
-        <button
-          onClick={async () => {
-            const newStatus = project.status === 'started' ? 'idea' : 'started';
-            await onStatusChange({ ...project, status: newStatus });
-          }}
-          className={cn(
-            "flex items-center gap-1 px-2 py-1 rounded-full",
-            {
-              'bg-[#21262d] text-github-text': project.status === 'idea',
-              'bg-[#238636] text-white': project.status === 'started',
-              'bg-[#1f6feb] text-white': project.status === 'completed',
-              'bg-[#da3633] text-white': project.status === 'abandonded',
-            }
-          )}
-        >
-          {statusOptions[project.status]?.icon}
-          {statusOptions[project.status]?.label}
-        </button>
       </div>
     </div>
   );

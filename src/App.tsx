@@ -1,15 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { PlusCircle, Folder, BrainCircuit as Brain, Terminal, LineChart, Cpu, Archive, Puzzle } from 'lucide-react';
+import { PlusCircle, List, BrainCircuit as Brain, Terminal, LineChart, Cpu, Archive, Puzzle, SlidersHorizontal, X } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { ProjectCard } from './components/ProjectCard';
 import { ProjectForm } from './components/ProjectForm';
 import type { Project, ProjectCategory } from './types';
 import { cn } from './lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ProjectFilters } from './components/ProjectFilters';
 // import { ReactComponent as Logo } from './assets/logo.svg?react';
 
 const categories: { id: ProjectCategory | 'all'; label: string; icon: React.ReactNode }[] = [
-  { id: 'all', label: 'All Projects', icon: <Folder className="w-5 h-5" /> },
+  { id: 'all', label: 'On-going', icon: <List className="w-5 h-5" /> },
   { id: 'research', label: 'Research', icon: <Brain className="w-5 h-5" /> },
   { id: 'analysis', label: 'Analysis', icon: <LineChart className="w-5 h-5" /> },
   { id: 'engineering', label: 'Engineering', icon: <Cpu className="w-5 h-5" /> },
@@ -19,11 +20,15 @@ const categories: { id: ProjectCategory | 'all'; label: string; icon: React.Reac
 function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<ProjectCategory | 'all'>('all');
+    const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const categoryRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [showArchive, setShowArchive] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [key, setKey] = useState(0);
 
   useEffect(() => {
     fetchProjects();
@@ -78,7 +83,7 @@ function App() {
   }
 
   async function handleToggleStarted(project: Project) {
-    const newStatus = project.status === 'started' ? 'idea' : 'started';
+    const newStatus = project.status === 'started' ? 'concept' : 'started';
     const { error } = await supabase
       .from('projects')
       .update({ status: newStatus })
@@ -92,15 +97,33 @@ function App() {
     await fetchProjects();
   }
 
-  const filteredProjects = projects.filter(project => 
-    selectedCategory === 'all' || project.categories === selectedCategory
-  );
+    const filteredProjects = projects.filter(project => {
+        const isArchive = showArchive && (project.status === 'completed' || project.status === 'abandonded');
+        const isNotArchived = !showArchive && project.status !== 'abandonded';
+
+        const categoryMatch = selectedCategory === 'all' || project.categories === selectedCategory;
+        const tagMatch = !selectedTag || project.tags.split(',').map(tag => tag.trim()).includes(selectedTag);
+
+        if (selectedCategory === 'all') {
+            return tagMatch && (isArchive || isNotArchived || project.status === 'completed' || project.status === 'concept' || project.status === 'started');
+        }
+
+        return categoryMatch && tagMatch && (isArchive || isNotArchived || project.status === 'concept' || project.status === 'started');
+    });
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
     if (a.status === 'started' && b.status !== 'started') return -1;
     if (a.status !== 'started' && b.status === 'started') return 1;
     return 0;
   });
+
+    const tagCounts = projects.reduce((acc, project) => {
+    project.tags.split(',').forEach(tag => {
+      const trimmedTag = tag.trim();
+      acc[trimmedTag] = (acc[trimmedTag] || 0) + 1;
+    });
+    return acc;
+  }, {} as { [tag: string]: number });
 
   return (
     <div className="min-h-screen bg-github-bg">
@@ -115,47 +138,32 @@ function App() {
               setEditingProject(null);
               setIsFormOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors text-base"
           >
             <PlusCircle className="w-5 h-5" />
             Add Project
           </button>
         </div>
 
-        <div className="relative mb-8 overflow-x-auto pb-2" ref={categoryRef}>
-          <motion.div
-            className="absolute top-0 left-0 h-full bg-github-green rounded-md transition-all duration-300"
-            style={{
-              left: categoryRef.current?.querySelector(`[data-category="${selectedCategory}"]`)?.offsetLeft || 0,
-              width: categoryRef.current?.querySelector(`[data-category="${selectedCategory}"]`)?.offsetWidth || 0,
-              height: categoryRef.current?.querySelector(`[data-category="${selectedCategory}"]`)?.offsetHeight || 0,
-            }}
-            layout
-          />
-          <div className="flex gap-2">
-            {categories.map(category => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={cn(
-                  "relative flex items-center gap-2 px-3 py-2 rounded-md transition-colors z-10 text-sm",
-                  selectedCategory === category.id
-                    ? "text-white"
-                    : "bg-github-card text-github-text border border-github-border hover:border-github-green"
-                )}
-                data-category={category.id}
-              >
-                {category.icon}
-                {category.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <ProjectFilters
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            selectedTag={selectedTag}
+            setSelectedTag={setSelectedTag}
+            showArchive={showArchive}
+            setShowArchive={setShowArchive}
+            isFilterOpen={isFilterOpen}
+            setIsFilterOpen={setIsFilterOpen}
+            tagCounts={tagCounts}
+            setKey={setKey}
+            categoryRef={categoryRef}
+        />
 
         {loading ? (
           <div className="text-center text-github-text">Loading projects...</div>
         ) : (
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" key={key}>
             <AnimatePresence>
               {sortedProjects.map(project => (
                 <motion.div
@@ -174,6 +182,7 @@ function App() {
                     onToggleStarted={handleToggleStarted}
                     onStatusChange={handleToggleStarted}
                     setToast={setToast}
+                      onTagClick={setSelectedTag}
                   />
                 </motion.div>
               ))}
