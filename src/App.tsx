@@ -21,11 +21,11 @@ import React, { useEffect, useState, useRef } from 'react';
     // import { ReactComponent as Logo } from './assets/logo.svg?react';
 
     const categories: { id: ProjectCategory | 'all'; label: string; icon: React.ReactNode }[] = [
-      { id: 'all', label: 'On-going', icon: <List className="w-5 h-5" /> },
-      { id: 'research', label: 'Research', icon: <Brain className="w-5 h-5" /> },
-      { id: 'analysis', label: 'Analysis', icon: <LineChart className="w-5 h-5" /> },
-      { id: 'engineering', label: 'Engineering', icon: <Cpu className="w-5 h-5" /> },
-      { id: 'miscellaneous', label: 'Miscellaneous', icon: <Puzzle className="w-5 h-5" /> },
+      { id: 'all', label: 'On-going', icon: <List className="w-4 h-4 md:w-5 md:h-5" /> },
+      { id: 'research', label: 'Research', icon: <Brain className="w-4 h-4 md:w-5 md:h-5" /> },
+      { id: 'analysis', label: 'Analysis', icon: <LineChart className="w-4 h-4 md:w-5 md:h-5" /> },
+      { id: 'engineering', label: 'Engineering', icon: <Cpu className="w-4 h-4 md:w-5 md:h-5" /> },
+      { id: 'miscellaneous', label: 'Miscellaneous', icon: <Puzzle className="w-4 h-4 md:w-5 md:h-5" /> },
     ];
 
     function App() {
@@ -141,8 +141,8 @@ import React, { useEffect, useState, useRef } from 'react';
         <div className="min-h-screen bg-github-bg">
           <div className="max-w-7xl mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-8">
-              <h1 className="text-3xl font-bold text-github-text flex items-center gap-2">
-                {/* <Logo className="w-8 h-8" /> */}
+              <h1 className="text-2xl md:text-3xl font-bold text-github-text flex items-center gap-1 md:gap-2">
+                {/* <Logo className="w-6 h-6 md:w-8 md:h-8" /> */}
                 Task Force <span className="font-thin">Monitor</span>
               </h1>
               <button
@@ -150,9 +150,9 @@ import React, { useEffect, useState, useRef } from 'react';
                   setEditingProject(null);
                   setIsFormOpen(true);
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors text-base"
+                className="flex items-center gap-1 md:gap-2 px-3 py-1 md:px-4 md:py-2 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors text-sm md:text-base"
               >
-                <PlusCircle className="w-5 h-5" />
+                <PlusCircle className="w-4 h-4 md:w-5 md:h-5" />
                 Add Project
               </button>
             </div>
@@ -175,7 +175,7 @@ import React, { useEffect, useState, useRef } from 'react';
             {loading ? (
               <div className="text-center text-github-text">Loading projects...</div>
             ) : (
-              <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" key={key}>
+              <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" key={key}>
                 <AnimatePresence>
                   {sortedProjects.map(project => (
                     <motion.div

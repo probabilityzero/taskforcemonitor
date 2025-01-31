@@ -59,15 +59,15 @@ import React, { useState, useRef, useEffect } from 'react';
       };
 
         const statusOptions = [
-            { value: 'concept', label: 'Concept', icon: <Lightbulb size={16} />, color: '#b388eb' },
-            { value: 'started', label: 'Started', icon: <PlayCircle size={16} />, color: '#238636' },
-            { value: 'completed', label: 'Completed', icon: <CheckCircle size={16} />, color: '#1f6feb' },
-            { value: 'abandonded', label: 'Abandoned', icon: <Flag size={16} />, color: '#6c757d' },
+            { value: 'concept', label: 'Concept', icon: <Lightbulb size={14} />, color: '#b388eb' },
+            { value: 'started', label: 'Started', icon: <PlayCircle size={14} />, color: '#238636' },
+            { value: 'completed', label: 'Completed', icon: <CheckCircle size={14} />, color: '#1f6feb' },
+            { value: 'abandonded', label: 'Abandoned', icon: <Flag size={14} />, color: '#6c757d' },
         ];
 
       return (
         <motion.div
-          className="bg-github-card rounded-lg w-full max-w-2xl relative border border-github-border p-4 md:p-6"
+          className="bg-github-card rounded-lg w-full max-w-2xl relative border border-github-border p-3 md:p-6"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
@@ -76,19 +76,19 @@ import React, { useState, useRef, useEffect } from 'react';
         >
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 text-github-text hover:text-white transition-colors"
+            className="absolute right-3 top-3 text-github-text hover:text-white transition-colors"
           >
-            <X size={20} md:size={24} />
+            <X size={16} md:size={20} />
           </button>
           
-          <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-github-text">
+          <h2 className="text-xl font-bold mb-3 md:mb-4 text-github-text">
             {project ? 'Edit Project' : 'Add Project'}
           </h2>
           
-          <form onSubmit={handleSubmit} className="space-y-2 md:space-y-4">
-            {formError && <div className="text-red-500 mb-4">{formError}</div>}
+          <form onSubmit={handleSubmit} className="space-y-2 md:space-y-3">
+            {formError && <div className="text-red-500 mb-2 md:mb-4">{formError}</div>}
             
-            <div className="mb-2 md:mb-4">
+            <div className="mb-2 md:mb-3">
               <div className="flex gap-1 md:gap-2">
                 {categories.map(category => (
                   <button
@@ -109,14 +109,14 @@ import React, { useState, useRef, useEffect } from 'react';
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1 text-github-text">Name</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full p-1 md:p-2 rounded-md border"
+                  className="w-full p-1 rounded-md border"
                   required
                 />
               </div>
@@ -135,12 +135,12 @@ import React, { useState, useRef, useEffect } from 'react';
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full p-1 md:p-2 rounded-md border"
-                rows={2} md:rows={3}
+                className="w-full p-1 rounded-md border"
+                rows={2}
               />
             </div>
             
-            <div className="mb-2 md:mb-4">
+            <div className="mb-2 md:mb-3">
               <label className="block text-sm font-medium mb-1 text-github-text">Tags</label>
               <div className="relative">
                 <input
@@ -149,7 +149,7 @@ import React, { useState, useRef, useEffect } from 'react';
                   onChange={handleTagInputChange}
                   onKeyDown={handleTagInputKeyDown}
                   placeholder=""
-                  className="w-full p-1 md:p-2 rounded-md border placeholder:text-xs"
+                  className="w-full p-1 rounded-md border placeholder:text-xs"
                     ref={tagInputRef}
                 />
               </div>
@@ -165,7 +165,7 @@ import React, { useState, useRef, useEffect } from 'react';
                         onClick={() => removeTag(index)}
                         className="text-github-text hover:text-white transition-colors"
                       >
-                        <X size={10} md:size={12} />
+                        <X size={10} />
                       </button>
                     </span>
                   ))}
@@ -190,7 +190,7 @@ import React, { useState, useRef, useEffect } from 'react';
                       type="url"
                       value={formData.link}
                       onChange={(e) => setFormData(prev => ({ ...prev, link: e.target.value }))}
-                      className="w-full p-1 md:p-2 rounded-md border"
+                      className="w-full p-1 rounded-md border"
                     />
                   </div>
                 </motion.div>
@@ -206,22 +206,22 @@ import React, { useState, useRef, useEffect } from 'react';
               <textarea
                 value={formData.comments}
                 onChange={(e) => setFormData(prev => ({ ...prev, comments: e.target.value }))}
-                className="w-full p-1 md:p-2 rounded-md border"
-                rows={2} md:rows={3}
+                className="w-full p-1 rounded-md border"
+                rows={2}
               />
             </div>
             
-            <div className="flex justify-end gap-2 md:gap-4 mt-4 md:mt-6">
+            <div className="flex justify-end gap-2 md:gap-4 mt-3 md:mt-4">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3 py-1 md:px-4 md:py-2 text-github-text hover:text-white transition-colors"
+                className="px-3 py-1 text-github-text hover:text-white transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-3 py-1 md:px-4 md:py-2 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors"
+                className="px-3 py-1 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors"
               >
                 {project ? 'Update' : 'Create'}
               </button>

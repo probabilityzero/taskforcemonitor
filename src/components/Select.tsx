@@ -45,18 +45,18 @@ import React, { useState, useRef, useEffect } from 'react';
           <button
             type="button"
             onClick={toggleOpen}
-            className="flex items-center justify-between w-40 p-2 rounded-md border border-github-border text-github-text"
+            className="flex items-center justify-between w-32 md:w-40 p-1 md:p-2 rounded-md border border-github-border text-github-text"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2">
               {selectedOption?.icon && <span style={{ color: selectedOption.color }}>{selectedOption.icon}</span>}
               <span>{selectedOption?.label}</span>
             </div>
-            <ChevronDown className="w-4 h-4" />
+            <ChevronDown className="w-3 h-3 md:w-4 md:h-4" />
           </button>
           <AnimatePresence>
             {isOpen && (
               <motion.ul
-                className="absolute top-full left-0 z-10 w-40 mt-1 bg-github-card rounded-md border border-github-border overflow-hidden"
+                className="absolute top-full left-0 z-10 w-32 md:w-40 mt-1 bg-github-card rounded-md border border-github-border overflow-hidden"
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
