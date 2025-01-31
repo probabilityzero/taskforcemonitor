@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { PlusCircle, Folder, BrainCircuit as Brain, Terminal, LineChart, Cpu, Archive } from 'lucide-react';
+import { PlusCircle, Folder, BrainCircuit as Brain, Terminal, LineChart, Cpu, Archive, Puzzle } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { ProjectCard } from './components/ProjectCard';
 import { ProjectForm } from './components/ProjectForm';
@@ -12,7 +12,7 @@ const categories: { id: ProjectCategory | 'all'; label: string; icon: React.Reac
   { id: 'research', label: 'Research', icon: <Brain className="w-5 h-5" /> },
   { id: 'analysis', label: 'Analysis', icon: <LineChart className="w-5 h-5" /> },
   { id: 'engineering', label: 'Engineering', icon: <Cpu className="w-5 h-5" /> },
-  { id: 'miscellaneous', label: 'Miscellaneous', icon: <Archive className="w-5 h-5" /> },
+  { id: 'miscellaneous', label: 'Miscellaneous', icon: <Puzzle className="w-5 h-5" /> },
 ];
 
 function App() {
@@ -105,7 +105,7 @@ function App() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-github-text">
-            Project Monitor
+            Task Force Monitor
           </h1>
           <button
             onClick={() => {
