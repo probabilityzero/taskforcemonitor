@@ -85,41 +85,42 @@ import React, { useRef } from 'react';
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <div className="p-2 flex items-center">
-                                <div className="flex items-center gap-2">
+                            <div className="p-2 flex flex-col md:flex-row items-start md:items-center">
+                                <div className="flex items-center gap-2 mb-2 md:mb-0">
                                     <Archive className="text-github-text" size={14} />
                                     <span className="text-github-text text-sm">Show Archive</span>
-                                </div>
-                                <button
-                                    onClick={() => setShowArchive(!showArchive)}
-                                    className={cn(
-                                        "relative ml-2 inline-flex h-5 w-9 items-center rounded-full transition-colors",
-                                        showArchive ? "bg-github-green" : "bg-github-border"
-                                    )}
-                                >
-                                    <span
+                                    <button
+                                        onClick={() => setShowArchive(!showArchive)}
                                         className={cn(
-                                            "translate-x-1 inline-block h-3 w-3 transform rounded-full bg-github-card transition-transform",
-                                            showArchive ? "translate-x-4" : ""
+                                            "relative ml-2 inline-flex h-5 w-9 items-center rounded-full transition-colors",
+                                            showArchive ? "bg-github-green" : "bg-github-border"
                                         )}
-                                    />
-                                </button>
-                                <div className="border-l border-github-border mx-2 h-5"></div>
-                                <div className="flex flex-wrap gap-1">
-                                    {Object.entries(tagCounts).map(([tag, count]) => (
-                                        <button
-                                            key={tag}
-                                            onClick={() => {
-                                                setSelectedTag(tag);
-                                            }}
+                                    >
+                                        <span
                                             className={cn(
-                                                "px-2 py-1 rounded-full text-xs text-github-text border border-github-border",
-                                                selectedTag === tag ? 'bg-github-green text-white' : 'bg-[#21262d]'
+                                                "translate-x-1 inline-block h-3 w-3 transform rounded-full bg-github-card transition-transform",
+                                                showArchive ? "translate-x-4" : ""
                                             )}
-                                        >
-                                            {tag} ({count})
-                                        </button>
-                                    ))}
+                                        />
+                                    </button>
+                                </div>
+                                <div className="md:border-l md:border-github-border md:mx-2 md:h-5 flex-1">
+                                  <div className="flex flex-wrap gap-1 p-2 md:p-0">
+                                      {Object.entries(tagCounts).map(([tag, count]) => (
+                                          <button
+                                              key={tag}
+                                              onClick={() => {
+                                                  setSelectedTag(tag);
+                                              }}
+                                              className={cn(
+                                                  "px-2 py-1 rounded-full text-xs text-github-text border border-github-border",
+                                                  selectedTag === tag ? 'bg-github-green text-white' : 'bg-[#21262d]'
+                                              )}
+                                          >
+                                              {tag} ({count})
+                                          </button>
+                                      ))}
+                                  </div>
                                 </div>
                             </div>
                         </motion.div>

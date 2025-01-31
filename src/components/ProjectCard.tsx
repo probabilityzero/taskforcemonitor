@@ -27,7 +27,10 @@ import React, { useState } from 'react';
           project.status === 'started' && "border-l-2 md:border-l-4 border-l-github-green"
         )}>
           <div className="flex justify-between items-start mb-1 md:mb-2">
-            <h3 className="text-base md:text-lg font-semibold text-github-text">{project.name}</h3>
+            <h3
+              onClick={() => onEdit(project)}
+              className="text-base md:text-lg font-semibold text-github-text cursor-pointer"
+            >{project.name}</h3>
             <button
               onClick={async () => {
                 onEdit(project)
