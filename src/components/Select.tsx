@@ -74,15 +74,6 @@ import React, { useState, useRef, useEffect } from 'react';
                     <div className="flex items-center gap-2 justify-start w-full">
                       {option.icon && <span style={{ color: option.color }}>{option.icon}</span>}
                       <span className="flex-1">{option.label}</span>
-                      <span className={cn(
-                        "w-2 h-2 rounded-full",
-                        {
-                          'bg-[#b388eb]': option.value === 'concept',
-                          'bg-[#238636]': option.value === 'started',
-                          'bg-[#1f6feb]': option.value === 'completed',
-                          'bg-[#6c757d]': option.value === 'abandonded',
-                        }
-                      )}></span>
                     </div>
                   </motion.li>
                 ))}

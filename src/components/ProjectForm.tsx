@@ -116,7 +116,7 @@ import React, { useState, useRef, useEffect } from 'react';
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="block text-sm font-medium text-github-text">Status</label>
+                <label className="block text-sm font-medium text-github-text">​​</label>   {/* zero width space */}
                 <Select
                   options={statusOptions}
                   value={formData.status}
@@ -135,8 +135,33 @@ import React, { useState, useRef, useEffect } from 'react';
               />
             </div>
             
+            
+            
+            <AnimatePresence>
+              {formData.status === 'completed' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-github-text">Link</label>
+                    <input
+                      type="url"
+                      value={formData.link}
+                      onChange={(e) => setFormData(prev => ({ ...prev, link: e.target.value }))}
+                      className="w-full p-1 rounded-md border"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            
+            
             <div className="mb-2 md:mb-3">
-              <label className="block text-sm font-medium mb-1 text-github-text">Tags</label>
+              <label className="block text-sm font-medium mb-1 text-github-text">Topics</label>
               <div className="relative">
                 <input
                   type="text"
@@ -166,31 +191,6 @@ import React, { useState, useRef, useEffect } from 'react';
                   ))}
                 </div>
             </div>
-            
-            
-            
-            
-            
-            <AnimatePresence>
-              {formData.status === 'completed' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div>
-                    <label className="block text-sm font-medium mb-1 text-github-text">Link</label>
-                    <input
-                      type="url"
-                      value={formData.link}
-                      onChange={(e) => setFormData(prev => ({ ...prev, link: e.target.value }))}
-                      className="w-full p-1 rounded-md border"
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
             
             
             
