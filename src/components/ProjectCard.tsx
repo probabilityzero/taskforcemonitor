@@ -65,7 +65,7 @@ import React, { useState } from 'react';
               ))}
             </div>
             <div className="flex items-center gap-2 text-sm">
-              {project.status === 'completed' ? (
+              {(project.status === 'completed' || project.status === 'started') ? (
                 project.link && (
                   <a
                     href={project.link}

@@ -9,7 +9,7 @@ import React, { useEffect, useState, useRef } from 'react';
       Archive,
       Puzzle,
       SlidersHorizontal,
-      X,
+      User,
     } from 'lucide-react';
     import { supabase } from './lib/supabase';
     import { ProjectCard } from './components/ProjectCard';
@@ -18,7 +18,6 @@ import React, { useEffect, useState, useRef } from 'react';
     import { cn } from './lib/utils';
     import { motion, AnimatePresence } from 'framer-motion';
     import { ProjectFilters } from './components/ProjectFilters';
-    // import { ReactComponent as Logo } from './assets/logo.svg?react';
 
     const categories: { id: ProjectCategory | 'all'; label: string; icon: React.ReactNode }[] = [
       { id: 'all', label: 'On-going', icon: <List className="w-4 h-4 md:w-5 md:h-5" /> },
@@ -64,22 +63,29 @@ import React, { useEffect, useState, useRef } from 'react';
       async function handleProjectSubmit(projectData: Partial<Project>) {
         try {
           setLoading(true);
+          let error;
           if (editingProject) {
-            const { error } = await supabase
+            const { error: updateError } = await supabase
               .from('projects')
               .update(projectData)
               .eq('id', editingProject.id);
-
-            if (error) throw error;
+            error = updateError;
           } else {
-            const { data, error } = await supabase
+            const { data, error: insertError } = await supabase
               .from('projects')
               .insert([projectData])
               .select()
               .single();
+            error = insertError;
+            if (data) {
+              setProjects(prev => [...prev, data]);
+            }
+          }
 
-            if (error) throw error;
-            setProjects(prev => [...prev, data]);
+          if (error) {
+            console.error('Supabase error:', error);
+            alert(`Failed to save project. ${error.message}`);
+            throw error;
           }
 
           setIsFormOpen(false);
@@ -139,22 +145,24 @@ import React, { useEffect, useState, useRef } from 'react';
 
       return (
         <div className="min-h-screen bg-github-bg">
-          <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="flex justify-between items-center mb-8">
+          <div className="max-w-7xl mx-auto px-4 py-4 md:py-6">
+            <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl md:text-3xl font-bold text-github-text flex items-center gap-1 md:gap-2">
                 {/* <Logo className="w-6 h-6 md:w-8 md:h-8" /> */}
                 Task Force <span className="font-thin">Monitor</span>
               </h1>
-              <button
-                onClick={() => {
-                  setEditingProject(null);
-                  setIsFormOpen(true);
-                }}
-                className="flex items-center gap-1 md:gap-2 px-3 py-1 md:px-4 md:py-2 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors text-sm md:text-base"
-              >
-                <PlusCircle className="w-4 h-4 md:w-5 md:h-5" />
-                Add Project
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setEditingProject(null);
+                    setIsFormOpen(true);
+                  }}
+                  className="flex items-center gap-1 md:gap-2 px-3 py-1 md:px-4 md:py-2 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors text-sm md:text-base"
+                >
+                  <PlusCircle className="w-4 h-4 md:w-5 md:h-5" />
+                  Create
+                </button>
+              </div>
             </div>
 
             <ProjectFilters
