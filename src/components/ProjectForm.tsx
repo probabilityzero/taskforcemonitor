@@ -31,6 +31,7 @@ import React, { useState, useRef, useEffect } from 'react';
         const categoryRef = useRef<HTMLDivElement>(null);
         const [allTags, setAllTags] = useState<string[]>([]);
         const [filteredTags, setFilteredTags] = useState<string[]>([]);
+        const [showTagSuggestions, setShowTagSuggestions] = useState(false);
 
         useEffect(() => {
             const fetchAllTags = async () => {
@@ -62,6 +63,7 @@ import React, { useState, useRef, useEffect } from 'react';
       const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setTagInput(value);
+        setShowTagSuggestions(true);
         if (value.trim() === '') {
             setFilteredTags(allTags);
         } else {
@@ -76,6 +78,7 @@ import React, { useState, useRef, useEffect } from 'react';
           setTagList(prev => [...prev, tagInput.trim()]);
             setTagInput('');
             setFilteredTags(allTags);
+            setShowTagSuggestions(false);
             if (tagInputRef.current) {
                 tagInputRef.current.focus();
             }
@@ -130,9 +133,16 @@ import React, { useState, useRef, useEffect } from 'react';
             setTagList(prev => [...prev, tag]);
             setTagInput('');
             setFilteredTags(allTags);
+            setShowTagSuggestions(false);
             if (tagInputRef.current) {
                 tagInputRef.current.focus();
             }
+        };
+
+        const handleBlur = () => {
+            setTimeout(() => {
+                setShowTagSuggestions(false);
+            }, 100);
         };
 
       return (
@@ -194,7 +204,7 @@ import React, { useState, useRef, useEffect } from 'react';
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full p-0.5 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm h-10"
+                  className="w-full p-0.5 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm h-10 mx-1 px-2"
                   required
                 />
               </div>
@@ -213,7 +223,7 @@ import React, { useState, useRef, useEffect } from 'react';
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full p-0.5 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm h-20"
+                className="w-full p-0.5 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm h-20 mx-1 px-2"
                 rows={2}
               />
             </div>
@@ -234,7 +244,7 @@ import React, { useState, useRef, useEffect } from 'react';
                       type="url"
                       value={formData.link}
                       onChange={(e) => setFormData(prev => ({ ...prev, link: e.target.value }))}
-                      className="w-full p-0.5 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm"
+                      className="w-full p-0.5 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm mx-1 px-2"
                     />
                   </div>
                 </motion.div>
@@ -252,10 +262,11 @@ import React, { useState, useRef, useEffect } from 'react';
                   onChange={handleTagInputChange}
                   onKeyDown={handleTagInputKeyDown}
                   placeholder=""
-                  className="w-full p-0.5 rounded-md border focus:border-github-border-light bg-github-input text-github-text placeholder:text-xs text-sm"
+                  className="w-full p-0.5 rounded-md border focus:border-github-border-light bg-github-input text-github-text placeholder:text-github-text/50 text-sm mx-1 px-2"
                     ref={tagInputRef}
+                    onBlur={handleBlur}
                 />
-                  {filteredTags.length > 0 && (
+                  {showTagSuggestions && filteredTags.length > 0 && (
                       <div className="absolute z-10 mt-1 w-full bg-github-card border border-github-border rounded-md max-h-32 overflow-y-auto">
                           {filteredTags.map(tag => (
                               <button
@@ -297,7 +308,7 @@ import React, { useState, useRef, useEffect } from 'react';
               <textarea
                 value={formData.comments}
                 onChange={(e) => setFormData(prev => ({ ...prev, comments: e.target.value }))}
-                className="w-full p-0.5 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm h-20"
+                className="w-full p-0.5 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm h-20 mx-1 px-2"
                 rows={2}
               />
             </div>

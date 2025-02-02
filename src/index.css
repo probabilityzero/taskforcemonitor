@@ -56,5 +56,5 @@
     input,
     textarea,
     select {
-      @apply bg-github-input border-github-border-light text-github-text focus:ring-0 focus:border-github-border-lighter;
+      @apply bg-github-input border-github-border-light text-github-text focus:ring-0 focus:border-github-border-lighter placeholder:text-github-text/50 px-2;
     }
