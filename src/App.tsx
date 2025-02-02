@@ -18,6 +18,11 @@ import React, { useEffect, useState, useRef } from 'react';
     import { cn } from './lib/utils';
     import { motion, AnimatePresence } from 'framer-motion';
     import { ProjectFilters } from './components/ProjectFilters';
+    import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+    import Auth from './pages/Auth';
+    import Welcome from './pages/Welcome';
+    import TermsOfService from './pages/TermsOfService';
+    import PrivacyPolicy from './pages/PrivacyPolicy';
 
     const categories: { id: ProjectCategory | 'all'; label: string; icon: React.ReactNode }[] = [
       { id: 'all', label: 'On-going', icon: <List className="w-4 h-4 md:w-5 md:h-5" /> },
@@ -39,16 +44,33 @@ import React, { useEffect, useState, useRef } from 'react';
       const [showArchive, setShowArchive] = useState(false);
       const [isFilterOpen, setIsFilterOpen] = useState(false);
       const [key, setKey] = useState(0);
+      const [user, setUser] = useState<any>(null);
+      const navigate = useNavigate();
 
       useEffect(() => {
-        fetchProjects();
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          setUser(session?.user ?? null);
+        });
+
+        supabase.auth.onAuthStateChange((_event, session) => {
+          setUser(session?.user ?? null);
+        });
       }, []);
+
+      useEffect(() => {
+        if (user) {
+          fetchProjects();
+        } else {
+          setProjects([]);
+        }
+      }, [user]);
 
       async function fetchProjects() {
         setLoading(true);
         const { data, error } = await supabase
           .from('projects')
           .select('*')
+          .eq('user_id', user?.id)
           .order('status', { ascending: false });
 
         if (error) {
@@ -73,7 +95,7 @@ import React, { useEffect, useState, useRef } from 'react';
           } else {
             const { data, error: insertError } = await supabase
               .from('projects')
-              .insert([projectData])
+              .insert([{ ...projectData, user_id: user?.id }])
               .select()
               .single();
             error = insertError;
@@ -143,6 +165,15 @@ import React, { useEffect, useState, useRef } from 'react';
         return acc;
       }, {} as { [tag: string]: number });
 
+      const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        navigate('/auth');
+      };
+
+      if (!user) {
+        return <Auth />;
+      }
+
       return (
         <div className="min-h-screen bg-github-bg">
           <div className="max-w-7xl mx-auto px-4 py-4 md:py-6">
@@ -162,6 +193,18 @@ import React, { useEffect, useState, useRef } from 'react';
                   <PlusCircle className="w-4 h-4 md:w-5 md:h-5" />
                   Create
                 </button>
+                {user ? (
+                  <button
+                    onClick={handleSignOut}
+                    className="text-github-text hover:text-white transition-colors"
+                  >
+                    <User size={24} />
+                  </button>
+                ) : (
+                  <Link to="/auth" className="text-github-text hover:text-white transition-colors">
+                    <User size={24} />
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -244,9 +287,26 @@ import React, { useEffect, useState, useRef } from 'react';
                 {toast}
               </motion.div>
             )}
+            <footer className="mt-8 text-center text-github-text text-sm">
+              <Link to="/terms" className="hover:text-white transition-colors mr-4">Terms of Service</Link>
+              <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            </footer>
           </div>
         </div>
       );
     }
 
-    export default App;
+    function AppWrapper() {
+      return (
+        <Router>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/" element={<App />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+          </Routes>
+        </Router>
+      );
+    }
+
+    export default AppWrapper;
