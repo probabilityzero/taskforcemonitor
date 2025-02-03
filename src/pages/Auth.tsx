@@ -87,15 +87,15 @@ function Auth() {
             <motion.div
               key="signup-form"
               initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, height: 'auto', y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3, type: 'spring', stiffness: 300, damping: 20 }}
+              transition={{ duration: 0.2, type: 'spring', stiffness: 300, damping: 20 }}
             >
               <h2 className="text-xl font-bold mb-4 text-github-text text-center">
                 Welcome!
               </h2>
               <p className="text-github-text text-center mb-6">
-                Let's create a new account to continue.
+                Let's create a new account
               </p>
               <div className="mb-4">
                 <input
@@ -152,7 +152,7 @@ function Auth() {
             <motion.div
               key="login-form"
               initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, height:'auto', y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, type: 'spring', stiffness: 300, damping: 20 }}
             >
@@ -236,7 +236,7 @@ function Auth() {
                   onClick={() => setShowCreateAccount(true)}
                   className="text-github-blue hover:text-white transition-colors ml-1 text-sm"
                 >
-                  Create a new one here
+                  Create a new one
                 </button>
               </div>
             </motion.div>
