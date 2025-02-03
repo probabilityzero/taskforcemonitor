@@ -1,60 +1,81 @@
 @tailwind base;
-    @tailwind components;
-    @tailwind utilities;
+@tailwind components;
+@tailwind utilities;
 
-    :root {
-      color-scheme: dark;
-    }
+:root {
+  color-scheme: dark;
+}
 
-    body {
-      @apply bg-github-bg text-github-text;
-      position: relative;
-      overflow: hidden;
-    }
+body {
+  @apply bg-github-bg text-github-text;
+  position: relative;
+  overflow: hidden;
+}
 
-    body::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image:
-        linear-gradient(to right, rgba(80, 80, 80, 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(80, 80, 80, 0.04) 1px, transparent 1px);
-      background-size: 20px 20px;
-      z-index: -1;
-    }
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(to right, rgba(80, 80, 80, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(80, 80, 80, 0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+  z-index: -1;
+}
 
-    body::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image:
-        linear-gradient(to right, rgba(100, 100, 100, 0.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(100, 100, 100, 0.05) 1px, transparent 1px);
-      background-size: 20px 20px;
-      opacity: 0;
-      z-index: -1;
-      transition: opacity 0.5s ease;
-      animation: grid-glow 5s linear infinite;
-    }
+body::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(to right, rgba(100, 100, 100, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(100, 100, 100, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.5s ease;
+  animation: grid-glow 5s linear infinite;
+}
 
-    @keyframes grid-glow {
-      0%,
-      100% {
-        opacity: 0;
-      }
-      50% {
-        opacity: 0.6;
-      }
-    }
+@keyframes grid-glow {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
 
-    input,
-    textarea,
-    select {
-      @apply bg-github-input border-github-border-light text-github-text focus:ring-0 focus:border-github-border-lighter;
-    }
+input,
+textarea,
+select {
+  @apply bg-github-input border-github-border-light text-github-text focus:ring-0 focus:border-github-border-lighter;
+}
+
+.button-github-font {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-weight: bold;
+}
+
+.auth-input {
+  @apply bg-github-card hover:bg-github-input focus:bg-github-input;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.auth-button {
+  @apply bg-github-green hover:bg-github-green-hover active:bg-github-green-hover;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.auth-provider-button {
+  @apply bg-github-card hover:bg-github-input active:bg-github-input;
+  transition: background-color 0.2s ease-in-out;
+  font-family: inherit; /* Revert to default font */
+}
