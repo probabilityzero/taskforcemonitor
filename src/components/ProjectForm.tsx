@@ -1,37 +1,49 @@
 import React, { useState, useRef, useEffect } from 'react';
-    import { X, Circle, PlayCircle, CheckCircle, Flag, Lightbulb, Trash2 } from 'lucide-react';
-    import type { Project, ProjectStatus, ProjectCategory } from '../types';
-    import { motion, AnimatePresence } from 'framer-motion';
-    import { cn } from '../lib/utils';
-    import { Select } from './Select';
-    import { supabase } from '../lib/supabase';
+import { X, Circle, PlayCircle, CheckCircle, Flag, Lightbulb, Trash2 } from 'lucide-react';
+import type { Project, ProjectStatus, ProjectCategory } from '../types';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../lib/utils';
+import { Select } from './Select';
+import { supabase } from '../lib/supabase';
 
-    interface ProjectFormProps {
-      project?: Project;
-      onSubmit: (data: Partial<Project>) => void;
-      onClose: () => void;
-      categories: { id: ProjectCategory | 'all'; label: string; icon: React.ReactNode }[];
-    }
+interface ProjectFormProps {
+  project?: Project;
+  onSubmit: (data: Partial<Project>) => void;
+  onClose: () => void;
+  categories: { id: ProjectCategory | 'all'; label: string; icon: React.ReactNode }[];
+}
 
-    export function ProjectForm({ project, onSubmit, onClose, categories }: ProjectFormProps) {
-      const [formData, setFormData] = useState({
-        name: project?.name || '',
-        description: project?.description || '',
-        categories: project?.categories || 'miscellaneous',
-        link: project?.link || '',
-        status: project?.status || 'concept',
-        tags: project?.tags || '',
-        comments: project?.comments || ''
-      });
-      const [formError, setFormError] = useState<string | null>(null);
-      const [tagInput, setTagInput] = useState('');
-      const [tagList, setTagList] = useState<string[]>(project?.tags ? project.tags.split(',').map(tag => tag.trim()) : []);
-        const tagInputRef = useRef<HTMLInputElement>(null);
-        const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-        const categoryRef = useRef<HTMLDivElement>(null);
-        const [allTags, setAllTags] = useState<string[]>([]);
-        const [filteredTags, setFilteredTags] = useState<string[]>([]);
-        const [showTagSuggestions, setShowTagSuggestions] = useState(false);
+export function ProjectForm({ project, onSubmit, onClose, categories }: ProjectFormProps) {
+  const [formData, setFormData] = useState({
+    name: project?.name || '',
+    description: project?.description || '',
+    categories: project?.categories || 'miscellaneous',
+    link: project?.link || '',
+    status: project?.status || 'concept',
+    tags: project?.tags || '',
+    comments: project?.comments || ''
+  });
+  const [formError, setFormError] = useState<string | null>(null);
+  const [tagInput, setTagInput] = useState('');
+  const [tagList, setTagList] = useState<string[]>(project?.tags ? project.tags.split(',').map(tag => tag.trim()) : []);
+    const tagInputRef = useRef<HTMLInputElement>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const categoryRef = useRef<HTMLDivElement>(null);
+    const [allTags, setAllTags] = useState<string[]>([]);
+    const [filteredTags, setFilteredTags] = useState<string[]>([]);
+    const [showTagSuggestions, setShowTagSuggestions] = useState(false);
+    const [isMobileView, setIsMobileView] = useState(false);
+
+    useEffect(() => {
+      const checkMobileView = () => {
+        setIsMobileView(window.innerWidth < 768);
+      };
+
+      checkMobileView();
+      window.addEventListener('resize', checkMobileView);
+      return () => window.removeEventListener('resize', checkMobileView);
+    }, []);
+
 
         useEffect(() => {
             const fetchAllTags = async () => {
@@ -147,23 +159,23 @@ import React, { useState, useRef, useEffect } from 'react';
 
       return (
         <motion.div
-          className="bg-github-card rounded-lg w-full max-w-2xl relative border border-github-border p-3 md:p-6"
+          className="bg-github-card rounded-lg w-full max-w-2xl relative border border-github-border p-3 md:p-6" // Removed backdrop classes from here
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.15 }}
           layout
         >
-          
+
           <div className="flex justify-between items-center mb-3 md:mb-4">
             <h2 className="text-xl font-bold text-github-text">
               {project ? 'Edit Project' : 'Create Project'}
             </h2>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-2 md:space-y-3">
             {formError && <div className="text-red-500 mb-2 md:mb-4">{formError}</div>}
-            
+
             <div className="mb-2 md:mb-3" ref={categoryRef}>
               <div className="relative overflow-x-auto pb-2">
                 <motion.div
@@ -196,8 +208,8 @@ import React, { useState, useRef, useEffect } from 'react';
                 </div>
               </div>
             </div>
-            
-            <div className="flex items-center gap-2 md:gap-4">
+
+            <div className="flex flex-col md:flex-row items-start gap-2 md:gap-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium mb-1 text-github-text">Name</label>
                 <input
@@ -208,16 +220,27 @@ import React, { useState, useRef, useEffect } from 'react';
                   required
                 />
               </div>
-              <div className="flex flex-col gap-1">
-                <label className="block text-sm font-medium text-github-text">​​</label>   {/* zero width space */}
-                <Select
-                  options={statusOptions}
-                  value={formData.status}
-                  onChange={(value) => setFormData(prev => ({ ...prev, status: value as ProjectStatus }))}
-                />
-              </div>
+              {isMobileView ? (
+                <div className="flex flex-col gap-1">
+                  <label className="block text-sm font-medium text-github-text">Status</label>
+                  <Select
+                    options={statusOptions}
+                    value={formData.status}
+                    onChange={(value) => setFormData(prev => ({ ...prev, status: value as ProjectStatus }))}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1 items-start">
+                  <label className="block text-sm font-medium text-github-text">​​</label>
+                  <Select
+                    options={statusOptions}
+                    value={formData.status}
+                    onChange={(value) => setFormData(prev => ({ ...prev, status: value as ProjectStatus }))}
+                  />
+                </div>
+              )}
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium mb-1 text-github-text">Description</label>
               <textarea
@@ -227,9 +250,9 @@ import React, { useState, useRef, useEffect } from 'react';
                 rows={2}
               />
             </div>
-            
-            
-            
+
+
+
             <AnimatePresence>
               {(formData.status === 'completed' || formData.status === 'started') && (
                 <motion.div
@@ -250,9 +273,8 @@ import React, { useState, useRef, useEffect } from 'react';
                 </motion.div>
               )}
             </AnimatePresence>
-            
-            
-            
+
+
             <div className="mb-2 md:mb-3">
               <label className="block text-sm font-medium mb-1 text-github-text">Topics</label>
               <div className="relative">
@@ -298,11 +320,8 @@ import React, { useState, useRef, useEffect } from 'react';
                   ))}
                 </div>
             </div>
-            
-            
-            
-            
-            
+
+
             <div>
               <label className="block text-sm font-medium mb-1 text-github-text">Notes</label>
               <textarea
@@ -312,7 +331,7 @@ import React, { useState, useRef, useEffect } from 'react';
                 rows={2}
               />
             </div>
-            
+
             <div className="flex justify-between items-center mt-3 md:mt-4">
               <button
                 type="button"

@@ -6,6 +6,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { FaGoogle, FaGithub, FaLinkedin } from 'react-icons/fa';
 import Logo from '../assets/logo.svg?react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Footer } from '../components/Footer';
 
 function Auth() {
   const [email, setEmail] = useState('');
@@ -22,22 +23,22 @@ function Auth() {
     setError(null);
     try {
       if (provider) {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider,
+        const { error: signInError } = await supabase.auth.signInWithOAuth({
+          provider: provider,
           options: {
-            redirectTo: `${window.location.origin}/`,
+            redirectTo: `${window.location.origin}/`, // Ensure correct redirect URL
           },
         });
-        if (error) {
-          setError(error.message);
+        if (signInError) {
+          setError(signInError.message);
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error: passwordError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) {
-          setError(error.message);
+        if (passwordError) {
+          setError(passwordError.message);
         } else {
           navigate('/');
         }
@@ -102,7 +103,7 @@ function Auth() {
                   placeholder="Name"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  className="auth-input w-full p-2 rounded-md border border-github-border text-github-text"
+                  className="auth-input w-full p-2 rounded-md border border-github-border bg-github-input-dark text-github-text"
                 />
               </div>
               <div className="mb-4">
@@ -111,7 +112,7 @@ function Auth() {
                   placeholder="Email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="auth-input w-full p-2 rounded-md border border-github-border text-github-text"
+                  className="auth-input w-full p-2 rounded-md border border-github-border bg-github-input-dark text-github-text"
                 />
               </div>
               <div className="relative mb-6">
@@ -120,7 +121,7 @@ function Auth() {
                   placeholder="Password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="auth-input w-full p-2 rounded-md border border-github-border text-github-text"
+                  className="auth-input w-full p-2 rounded-md border border-github-border bg-github-input-dark text-github-text"
                 />
                 <button
                   type="button"
@@ -164,7 +165,7 @@ function Auth() {
               <div className="mb-4">
                 <button
                   onClick={() => handleSignIn('google')}
-                  className="auth-provider-button w-full flex items-center justify-center gap-2 py-2 rounded-md transition-colors text-github-text border border-github-border bg-google-gradient hover:opacity-90"
+                  className="auth-provider-button button-github-font w-full flex items-center justify-center gap-2 py-2 rounded-md transition-colors text-github-text border border-github-border bg-google-gradient hover:opacity-90"
                 >
                   <FaGoogle size={20} />
                   Continue with Google
@@ -173,7 +174,7 @@ function Auth() {
               <div className="mb-4">
                 <button
                   onClick={() => handleSignIn('github')}
-                  className="auth-provider-button w-full flex items-center justify-center gap-2 py-2 rounded-md transition-colors text-github-text border border-github-border bg-github-gradient hover:opacity-90"
+                  className="auth-provider-button button-github-font w-full flex items-center justify-center gap-2 py-2 rounded-md transition-colors text-github-text border border-github-border bg-github-gradient hover:opacity-90"
                 >
                   <FaGithub size={20} />
                   Continue with GitHub
@@ -182,7 +183,7 @@ function Auth() {
               <div className="mb-6">
                 <button
                   onClick={() => handleSignIn('linkedin')}
-                  className="auth-provider-button w-full flex items-center justify-center gap-2 py-2 rounded-md transition-colors text-github-text border border-github-border bg-linkedin-gradient hover:opacity-90"
+                  className="auth-provider-button button-github-font w-full flex items-center justify-center gap-2 py-2 rounded-md transition-colors text-github-text border border-github-border bg-linkedin-gradient hover:opacity-90"
                 >
                   <FaLinkedin size={20} />
                   Continue with LinkedIn
@@ -203,7 +204,7 @@ function Auth() {
                   placeholder="Email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="auth-input w-full p-2 rounded-md border border-github-border text-github-text"
+                  className="auth-input w-full p-2 rounded-md border border-github-border bg-github-input-dark text-github-text"
                 />
               </div>
               <div className="relative mb-6">
@@ -212,7 +213,7 @@ function Auth() {
                   placeholder="Password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="auth-input w-full p-2 rounded-md border border-github-border text-github-text"
+                  className="auth-input w-full p-2 rounded-md border border-github-border bg-github-input-dark text-github-text"
                 />
                 <button
                   type="button"
@@ -242,14 +243,7 @@ function Auth() {
           )}
         </AnimatePresence>
       </div>
-      <footer className="w-full py-4 text-center text-github-text text-sm">
-        <p>© {new Date().getFullYear()} Bastille, Inc.</p>
-        <div className="flex justify-center space-x-4 mt-2">
-          <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-          <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-          <a href="mailto:contact@bastilleinc.com" className="hover:text-white transition-colors">Contact</a>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

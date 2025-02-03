@@ -9,7 +9,6 @@ import {
   Archive,
   Puzzle,
   SlidersHorizontal,
-  User,
 } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { ProjectCard } from './components/ProjectCard';
@@ -23,6 +22,10 @@ import Auth from './pages/Auth';
 import Welcome from './pages/Welcome';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import { Footer } from './components/Footer';
+import { ProfileDropdown } from './components/ProfileDropdown';
+import { User } from 'lucide-react';
+import AccountSettings from './pages/AccountSettings';
 
 const categories: { id: ProjectCategory | 'all'; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'On-going', icon: <List className="w-4 h-4 md:w-5 md:h-5" /> },
@@ -46,6 +49,13 @@ function App() {
   const [key, setKey] = useState(0);
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isBlurBackground, setIsBlurBackground] = useState(false);
+
+  useEffect(() => {
+    setIsBlurBackground(isFormOpen || isProfileDropdownOpen);
+  }, [isFormOpen, isProfileDropdownOpen]);
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -165,68 +175,68 @@ function App() {
     return acc;
   }, {} as { [tag: string]: number });
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
-  };
-
-  if (!user) {
-    return <Auth />;
-  }
 
   return (
-    <div className="min-h-screen bg-github-bg">
-      <div className="max-w-7xl mx-auto px-4 py-4 md:py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-github-text flex items-center gap-1 md:gap-2">
-            {/* <Logo className="w-6 h-6 md:w-8 md:h-8" /> */}
-            Task Force <span className="font-thin">Monitor</span>
-          </h1>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setEditingProject(null);
-                setIsFormOpen(true);
-              }}
-              className="flex items-center gap-1 md:gap-2 px-3 py-1 md:px-4 md:py-2 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors text-sm md:text-base"
-            >
-              <PlusCircle className="w-4 h-4 md:w-5 md:h-5" />
-              Create
-            </button>
-            {user ? (
+    <div className={cn("min-h-screen bg-github-bg flex flex-col justify-between", isBlurBackground ? "backdrop-blur-md bg-black/40" : "")}>
+      <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 w-full">
+        <div className="mb-3 md:mb-4">
+          <div className="flex justify-between items-center px-0 md:px-0 mb-2 md:mb-3">
+            <h1 className="text-xl md:text-3xl font-bold text-github-text flex items-center gap-1 md:gap-2">
+              Task Force <span className="font-thin">Monitor</span>
+            </h1>
+            <div className="flex items-center gap-4 md:gap-6">
               <button
-                onClick={handleSignOut}
-                className="text-github-text hover:text-white transition-colors"
+                onClick={() => {
+                  setEditingProject(null);
+                  setIsFormOpen(true);
+                }}
+                className="flex items-center gap-1 md:gap-2 px-3 py-1 md:px-4 md:py-2 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors text-sm md:text-base"
               >
-                <User size={24} />
+                <PlusCircle className="w-4 h-4 md:w-5 md:h-5" />
+                Create
               </button>
-            ) : (
-              <Link to="/auth" className="text-github-text hover:text-white transition-colors">
-                <User size={24} />
-              </Link>
-            )}
+              {user && (
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsProfileDropdownOpen(!isProfileDropdownOpen);
+                    }}
+                    className="profile-button"
+                  >
+                    <User size={24} />
+                  </button>
+                  <AnimatePresence>
+                    {isProfileDropdownOpen && (
+                      <ProfileDropdown onClose={() => setIsProfileDropdownOpen(false)} user={user} />
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
           </div>
+          <ProjectFilters
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            selectedTag={selectedTag}
+            setSelectedTag={setSelectedTag}
+            showArchive={showArchive}
+            setShowArchive={setShowArchive}
+            isFilterOpen={isFilterOpen}
+            setIsFilterOpen={setIsFilterOpen}
+            tagCounts={tagCounts}
+            setKey={setKey}
+            categoryRef={categoryRef}
+            className="mt-2 md:mt-4 px-0 md:px-0"
+          />
         </div>
 
-        <ProjectFilters
-          categories={categories}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          selectedTag={selectedTag}
-          setSelectedTag={setSelectedTag}
-          showArchive={showArchive}
-          setShowArchive={setShowArchive}
-          isFilterOpen={isFilterOpen}
-          setIsFilterOpen={setIsFilterOpen}
-          tagCounts={tagCounts}
-          setKey={setKey}
-          categoryRef={categoryRef}
-        />
 
         {loading ? (
           <div className="text-center text-github-text">Loading projects...</div>
         ) : (
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" key={key}>
+          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             <AnimatePresence>
               {sortedProjects.map(project => (
                 <motion.div
@@ -288,14 +298,7 @@ function App() {
           </motion.div>
         )}
       </div>
-      <footer className="w-full py-4 text-center text-github-text text-sm">
-        <div className="flex justify-center space-x-4 mt-2">
-          <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-          <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-          <a href="mailto:contact@bastilleinc.com" className="hover:text-white transition-colors">Contact</a>
-        </div>
-        <p>© {new Date().getFullYear()} Bastille, Inc.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
@@ -308,6 +311,7 @@ function AppWrapper() {
         <Route path="/" element={<App />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/account-settings" element={<AccountSettings />} />
       </Routes>
     </Router>
   );
