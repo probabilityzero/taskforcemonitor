@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import {
   PlusCircle,
@@ -13,10 +14,10 @@ import {
 import { supabase } from './lib/supabase';
 import { ProjectCard } from './components/ProjectCard';
 import { ProjectForm } from './components/ProjectForm';
+import { ProjectFilters } from './components/ProjectFilters'; // Import ProjectFilters here!
 import type { Project, ProjectCategory } from './types';
 import { cn } from './lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ProjectFilters } from './components/ProjectFilters';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import Auth from './pages/Auth';
 import Welcome from './pages/Welcome';
@@ -59,10 +60,12 @@ function App() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial Session:', session); // Log initial session
       setUser(session?.user ?? null);
     });
 
     supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth State Change Session:', session); // Log session on auth state change
       setUser(session?.user ?? null);
     });
   }, []);

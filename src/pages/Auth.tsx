@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
@@ -6,7 +7,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { FaGoogle, FaGithub, FaLinkedin } from 'react-icons/fa';
 import Logo from '../assets/logo.svg?react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Footer } from '../components/Footer';
+import { Footer } from './../components/Footer';
 
 function Auth() {
   const [email, setEmail] = useState('');
@@ -27,10 +28,11 @@ function Auth() {
         setToast(`Login via ${provider} coming soon!`);
         return;
       } else if (provider === 'github') {
+        const redirectURL = `${window.location.origin}/#`; // Include hash in redirectURL
         const { error: signInError } = await supabase.auth.signInWithOAuth({
           provider: provider,
           options: {
-            redirectTo: window.location.origin,
+            redirectTo: redirectURL, // Use the constructed redirectURL
           },
         });
         if (signInError) {
@@ -58,7 +60,7 @@ function Auth() {
     setLoading(true);
     setError(null);
     try {
-      const { error: signUpError, data } = await supabase.auth.signUp({ // Capture both error and data
+      const { error: signUpError, data } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -68,14 +70,18 @@ function Auth() {
         },
       });
       if (signUpError) {
-        console.error('Sign-up error:', signUpError); // Log the detailed error to console
-        setError(signUpError.message); // Display error message to the user
+        console.error('Sign-up error:', signUpError);
+        if (signUpError.message.includes('AuthWeakPasswordError')) {
+          setError('Password must be at least 6 characters long.');
+        } else {
+          setError(signUpError.message);
+        }
       } else {
-        console.log('Sign-up successful:', data); // Log success and data (optional)
+        console.log('Sign-up successful:', data);
         navigate('/');
       }
     } catch (err: any) {
-      console.error('Sign-up exception:', err); // Log any exceptions during sign-up
+      console.error('Sign-up exception:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -104,6 +110,9 @@ function Auth() {
               <p className="text-github-text text-center mb-6">
                 Let's create a new account
               </p>
+              {error && (
+                <div className="text-red-500 mb-3 text-sm">{error}</div>
+              )}
               <div className="mb-4">
                 <input
                   type="text"
@@ -169,6 +178,9 @@ function Auth() {
               <p className="text-github-text text-center mb-6">
                 Please sign in to continue
               </p>
+              {error && (
+                <div className="text-red-500 mb-3 text-sm">{error}</div>
+              )}
               <div className="mb-4">
                 <button
                   onClick={() => handleSignIn('google')}
