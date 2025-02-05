@@ -20,7 +20,6 @@ import { cn } from './lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import Auth from './pages/Auth';
-import Welcome from './pages/Welcome';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import { Footer } from './components/Footer';
@@ -178,7 +177,7 @@ function App() {
 
 
         {loading ? (
-          <div className="text-center text-github-text">Loading projects...</div>
+          <div className="text-left text-github-text">Loading projects...</div>
         ) : (
           <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             <AnimatePresence>
