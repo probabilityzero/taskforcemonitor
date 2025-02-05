@@ -30,7 +30,7 @@ function Auth() {
         const { error: signInError } = await supabase.auth.signInWithOAuth({
           provider: provider,
           options: {
-            redirectTo: window.location.origin, // Ensure correct redirect URL - using window.location.origin
+            redirectTo: window.location.origin,
           },
         });
         if (signInError) {
@@ -58,7 +58,7 @@ function Auth() {
     setLoading(true);
     setError(null);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { error: signUpError, data } = await supabase.auth.signUp({ // Capture both error and data
         email,
         password,
         options: {
@@ -67,12 +67,15 @@ function Auth() {
           },
         },
       });
-      if (error) {
-        setError(error.message);
+      if (signUpError) {
+        console.error('Sign-up error:', signUpError); // Log the detailed error to console
+        setError(signUpError.message); // Display error message to the user
       } else {
+        console.log('Sign-up successful:', data); // Log success and data (optional)
         navigate('/');
       }
     } catch (err: any) {
+      console.error('Sign-up exception:', err); // Log any exceptions during sign-up
       setError(err.message);
     } finally {
       setLoading(false);
