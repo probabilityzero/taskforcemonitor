@@ -17,16 +17,20 @@ function Auth() {
   const navigate = useNavigate();
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   const handleSignIn = async (provider: 'google' | 'github' | 'linkedin' | null = null) => {
     setLoading(true);
     setError(null);
     try {
-      if (provider) {
+      if (provider === 'google' || provider === 'linkedin') {
+        setToast(`Login via ${provider} coming soon!`);
+        return;
+      } else if (provider === 'github') {
         const { error: signInError } = await supabase.auth.signInWithOAuth({
           provider: provider,
           options: {
-            redirectTo: `${window.location.origin}/`, // Ensure correct redirect URL
+            redirectTo: window.location.origin, // Ensure correct redirect URL - using window.location.origin
           },
         });
         if (signInError) {
@@ -224,7 +228,7 @@ function Auth() {
                 </button>
               </div>
               <button
-                onClick={handleSignIn}
+                onClick={() => handleSignIn(null)}
                 className="auth-button w-full bg-github-green hover:bg-github-green-hover text-white py-2 rounded-md transition-colors"
                 disabled={loading}
               >
@@ -244,6 +248,20 @@ function Auth() {
         </AnimatePresence>
       </div>
       <Footer />
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            className="fixed bottom-4 left-4 bg-github-card p-4 rounded-md border border-github-border text-github-text z-50"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.2 }}
+            onAnimationComplete={() => setTimeout(() => setToast(null), 3000)}
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
