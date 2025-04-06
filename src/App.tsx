@@ -4,12 +4,9 @@ import {
   PlusCircle,
   List,
   BrainCircuit as Brain,
-  Terminal,
   LineChart,
   Cpu,
-  Archive,
   Puzzle,
-  SlidersHorizontal,
 } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { ProjectCard } from './components/ProjectCard';
@@ -18,14 +15,14 @@ import { ProjectFilters } from './components/ProjectFilters'; // Import ProjectF
 import type { Project, ProjectCategory } from './types';
 import { cn } from './lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
-import Auth from './pages/Auth';
-import TermsOfService from './pages/TermsOfService';
-import PrivacyPolicy from './pages/PrivacyPolicy';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import Auth from './app/Auth';
+import TermsOfService from './app/TermsOfService';
+import PrivacyPolicy from './app/PrivacyPolicy';
 import { Footer } from './components/Footer';
 import { ProfileDropdown } from './components/ProfileDropdown';
 import { User } from 'lucide-react';
-import AccountSettings from './pages/AccountSettings';
+import AccountSettings from './app/AccountSettings';
 
 const categories: { id: ProjectCategory | 'all'; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'On-going', icon: <List className="w-4 h-4 md:w-5 md:h-5" /> },
