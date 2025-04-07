@@ -391,10 +391,6 @@ function AccountSettings() {
 
   return (
     <div className="min-h-screen bg-github-bg flex flex-col">
-      <Header 
-        user={user} 
-        minimal={true} // Show only the first level of the header
-      />
       
       <div className="flex-1">
         <div className="max-w-6xl mx-auto px-4 py-6">
