@@ -171,14 +171,6 @@ export default function Projects() {
       <div className="max-w-screen-xl mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-white">Projects</h1>
-          
-          <button
-            onClick={() => setIsFormOpen(true)}
-            className="flex items-center gap-1 px-3 py-1.5 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span>New Project</span>
-          </button>
         </div>
 
         {/* Search and filters */}

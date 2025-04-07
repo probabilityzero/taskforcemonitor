@@ -418,7 +418,7 @@ function Timeline() {
                   )}
                 >
                   {/* Timeline dot */}
-                  <div className="absolute left-4 w-4 h-4 rounded-full bg-github-card border-4 border-github-border transform -translate-x-1/2 flex items-center justify-center">
+                  <div className="absolute left-6 w-4 h-4 rounded-full bg-github-card border-4 border-github-border transform -translate-x-1/2 flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-github-green"></div>
                   </div>
                   

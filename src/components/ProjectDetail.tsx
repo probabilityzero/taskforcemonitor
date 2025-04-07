@@ -260,13 +260,6 @@ function ProjectDetail({
         <div className="bg-github-fg rounded-md p-4 border border-github-border">
           <h3 className="text-github-text text-sm mb-2">Status</h3>
           <div className="flex flex-col gap-2">
-            <div className={cn(
-              "px-3 py-1.5 text-sm rounded-md flex items-center gap-1.5 border w-full", 
-              getStatusColor(project.status)
-            )}>
-              {getStatusIcon(project.status)} 
-              {getStatusLabel(project.status)}
-            </div>
             <div className="flex flex-wrap gap-1 mt-1">
               <button 
                 className={cn(
