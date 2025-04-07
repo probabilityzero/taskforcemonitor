@@ -227,20 +227,27 @@ export default function Projects() {
       <div className="max-w-screen-xl mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-white">Projects</h1>
-          <button
-            onClick={() => setIsFormOpen(true)}
-            className="inline-flex items-center gap-1 px-4 py-2 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">New Project</span>
-            <span className="sm:hidden">New</span>
-          </button>
         </div>
 
         {/* Search and filters */}
         <div className="mb-8 space-y-4">
           {/* Status and Category filter dropdowns moved to left of search */}
           <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search input - expanded to full width */}
+            <div className="relative flex-grow">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-github-text" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search projects..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-github-border rounded-md bg-github-input text-github-text focus:outline-none focus:ring-1 focus:ring-github-blue focus:border-github-blue"
+              />
+            </div>
+
+            
             {/* Status and Category dropdowns - side by side for medium screens and up */}
             <div className="flex flex-wrap gap-2 w-full sm:w-auto sm:flex-nowrap">
               {/* Status dropdown */}
@@ -360,28 +367,14 @@ export default function Projects() {
                 </button>
               )}
             </div>
-            
-            {/* Search input - expanded to full width */}
-            <div className="relative flex-grow">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-github-text" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search projects..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-github-border rounded-md bg-github-input text-github-text focus:outline-none focus:ring-1 focus:ring-github-blue focus:border-github-blue"
-              />
-            </div>
           </div>
           
           {/* Tags filter bar */}
           {allTags.length > 0 && (
             <div className="py-2">
               <div className="flex items-center gap-2 mb-2">
-                <Tag size={14} className="text-github-text" />
                 <h3 className="text-sm font-medium text-github-text">Topics</h3>
+                <Tag size={14} className="text-github-text" />
               </div>
               <div className="flex flex-wrap gap-2">
                 {allTags.map(tag => (
