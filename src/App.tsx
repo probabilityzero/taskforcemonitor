@@ -14,6 +14,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import AdminPage from './app/AdminPage';
 import { ProjectForm } from './components/ProjectForm';
 import Auth from './app/Auth'; 
+import Projects from './app/Projects';
+import WelcomePage from './app/WelcomePage';
 
 export const AppContext = createContext<{
   user: any | null;
@@ -161,15 +163,16 @@ function AppContent() {
       <div className="min-h-screen bg-github-bg">
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Auth />} />
-          <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <Auth />} />
+          <Route path="/welcome" element={user ? <Navigate to="/" replace /> : <WelcomePage />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           
           {/* Protected routes with persistent header */}
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
-              <Route path="/dashboard" element={<HomePage />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/project" element={<Projects />} /> 
               <Route path="/timeline" element={<Timeline />} />
               <Route path="/repositories" element={<Repositories />} />
               <Route path="/account-settings" element={<AccountSettings />} />

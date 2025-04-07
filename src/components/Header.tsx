@@ -46,7 +46,7 @@ export function Header({
   
   // Define navigation items
   const navItems = [
-    { path: '/dashboard', label: 'Overview', icon: <LayoutDashboard size={14} /> },
+    { path: '/', label: 'Overview', icon: <LayoutDashboard size={14} /> },
     { path: '/timeline', label: 'Timeline', icon: <History size={14} /> },
     { path: '/repositories', label: 'Repositories', icon: <GitBranch size={14} /> },
     { path: '/projects', label: 'Projects', icon: <Book size={14} /> },
