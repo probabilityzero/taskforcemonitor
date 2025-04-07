@@ -8,12 +8,13 @@ import {
   Lightbulb,
   Zap,
   GitBranchPlus,
-  ChevronRight
+  ChevronRight,
+  LogIn
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { AuthForm } from '../components/AuthForm';
 import { Footer } from '../components/Footer';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 const features = [
@@ -43,65 +44,69 @@ export default function WelcomePage() {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [showAuthForm, setShowAuthForm] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const playerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Load YouTube IFrame API
+  // Check for auth mode in URL
   useEffect(() => {
-    // Only load the YouTube API if it hasn't been loaded already
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-      
-      // Set up callback for when API is ready
-      window.onYouTubeIframeAPIReady = initializePlayer;
-    } else {
-      // If the API is already loaded, initialize the player directly
-      initializePlayer();
+    const query = new URLSearchParams(location.search);
+    const mode = query.get('auth');
+    
+    if (mode === 'login') {
+      setAuthMode('login');
+      setShowAuthForm(true);
+    } else if (mode === 'join') {
+      setAuthMode('signup');
+      setShowAuthForm(true);
+    }
+  }, [location]);
+
+  // Load video background
+  useEffect(() => {
+    // Only load on larger screens and when video isn't disabled by user preference
+    if (window.innerWidth < 768 || localStorage.getItem('disableVideoBg') === 'true') {
+      return;
     }
 
+    // Simple fallback video approach instead of YouTube API
+    const videoElement = document.createElement('video');
+    videoElement.muted = true;
+    videoElement.loop = true;
+    videoElement.playsInline = true;
+    videoElement.autoplay = true;
+    videoElement.className = 'absolute inset-0 w-full h-full object-cover scale-[1.2] transform-gpu';
+    
+    // You can host your background video on a CDN or use a stock video
+    videoElement.src = 'https://cdn.taskforcemonitor.com/bg-video.mp4'; // Replace with your actual video URL
+    
+    videoElement.onloadeddata = () => {
+      if (playerRef.current) {
+        playerRef.current.innerHTML = '';
+        playerRef.current.appendChild(videoElement);
+        setVideoLoaded(true);
+      }
+    };
+    
+    videoElement.onerror = () => {
+      // Fallback to a static gradient background if video fails to load
+      setVideoLoaded(true);
+    };
+    
+    if (playerRef.current) {
+      playerRef.current.appendChild(videoElement);
+    }
+    
     return () => {
-      // Clean up the global callback when component unmounts
-      window.onYouTubeIframeAPIReady = null;
+      if (videoElement) {
+        videoElement.pause();
+        videoElement.src = '';
+        videoElement.load();
+      }
     };
   }, []);
-
-  const initializePlayer = () => {
-    if (playerRef.current && window.YT) {
-      new window.YT.Player(playerRef.current, {
-        videoId: 'ez471e1d1Ec', // Your YouTube video ID
-        playerVars: {
-          autoplay: 1,
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          iv_load_policy: 3,
-          loop: 1,
-          modestbranding: 1,
-          playsinline: 1,
-          rel: 0,
-          showinfo: 0,
-          mute: 1, // Make sure the video is muted
-          playlist: 'ez471e1d1Ec', // Needed for looping
-        },
-        events: {
-          onReady: (event) => {
-            event.target.mute(); // Ensure muted
-            event.target.playVideo();
-            setVideoLoaded(true);
-          },
-          onStateChange: (event) => {
-            // If video ends, restart it to maintain the loop
-            if (event.data === window.YT.PlayerState.ENDED) {
-              event.target.playVideo();
-            }
-          }
-        }
-      });
-    }
-  };
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -125,7 +130,7 @@ export default function WelcomePage() {
   }, []);
 
   const onAuthSuccess = () => {
-    navigate('/');
+    navigate('/dashboard');
   };
 
   return (
@@ -142,20 +147,50 @@ export default function WelcomePage() {
             <h1 className="text-xl font-bold text-github-text">Task Force <span className="font-thin">Monitor</span></h1>
           </div>
           
-          {!user && !isSmallScreen && (
+          {!user && (
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => {
+                  setAuthMode('login');
+                  setShowAuthForm(true);
+                }}
+                className="px-3 py-1.5 text-sm text-github-text hover:text-white transition-colors"
+              >
+                Sign in
+              </button>
+              <button 
+                onClick={() => {
+                  setAuthMode('signup');
+                  setShowAuthForm(true);
+                }}
+                className="px-3 py-1.5 text-sm bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors"
+              >
+                Sign up
+              </button>
+            </div>
+          )}
+          
+          {user && (
             <button 
-              onClick={() => navigate('/auth')}
-              className="text-github-text hover:text-white transition-colors"
+              onClick={() => navigate('/dashboard')}
+              className="px-3 py-1.5 text-sm flex items-center gap-1.5 bg-github-card text-github-text border border-github-border hover:text-white rounded-md transition-colors"
             >
-              Log in
+              <LogIn size={16} />
+              Dashboard
             </button>
           )}
         </div>
       </header>
 
-      {/* Video Background */}
+      {/* Video Background with fallback gradient */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-black/80 z-10"></div> {/* Overlay to darken the video */}
+        {/* Static gradient background that's always visible */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-github-bg to-blue-900"></div>
+        
+        {/* Video overlay */}
+        <div className="absolute inset-0 bg-black/70 z-10"></div>
+        
+        {/* Video container */}
         <div 
           className={cn(
             "absolute inset-0 w-full h-full transition-opacity duration-1000", 
@@ -164,11 +199,45 @@ export default function WelcomePage() {
         >
           <div 
             ref={playerRef}
-            className="w-full h-full scale-[1.5] transform-gpu"
-            id="youtube-player"
+            className="w-full h-full"
           />
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AnimatePresence>
+        {showAuthForm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowAuthForm(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-github-card border border-github-border rounded-lg shadow-xl p-6 w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-6 flex justify-center">
+                <img 
+                  src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg" 
+                  alt="Task Force Monitor" 
+                  className="w-10 h-10"
+                />
+              </div>
+              
+              <AuthForm 
+                initialMode={authMode} 
+                onSuccess={onAuthSuccess}
+                onClose={() => setShowAuthForm(false)}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hero Section */}
       <main className="relative z-[1]">
@@ -189,19 +258,33 @@ export default function WelcomePage() {
                   Task Force Monitor helps you keep track of all your ideas, ongoing work, and completed projects in one beautiful dashboard.
                 </p>
                 
-                {!isSmallScreen && !user ? (
-                  <button
-                    onClick={() => document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="flex items-center gap-2 px-6 py-3 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors text-lg"
-                  >
-                    Get Started <ArrowRight />
-                  </button>
+                {!user ? (
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={() => {
+                        setAuthMode('signup');
+                        setShowAuthForm(true);
+                      }}
+                      className="flex items-center gap-2 px-6 py-3 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-lg"
+                    >
+                      Get Started <ArrowRight />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setAuthMode('login');
+                        setShowAuthForm(true);
+                      }}
+                      className="flex items-center gap-2 px-6 py-3 bg-github-card border border-github-border text-github-text hover:text-white rounded-md transition-colors text-lg"
+                    >
+                      Sign In <LogIn size={18} />
+                    </button>
+                  </div>
                 ) : (
                   <button
-                    onClick={() => navigate(user ? '/' : '/auth')}
-                    className="flex items-center gap-2 px-6 py-3 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors text-lg"
+                    onClick={() => navigate('/dashboard')}
+                    className="flex items-center gap-2 px-6 py-3 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-lg"
                   >
-                    {user ? 'Go to Dashboard' : 'Get Started'} <ArrowRight />
+                    Go to Dashboard <ArrowRight />
                   </button>
                 )}
               </motion.div>
@@ -305,12 +388,36 @@ export default function WelcomePage() {
             <p className="text-xl text-github-text mb-8 max-w-3xl mx-auto">
               Join thousands of developers and creators who use Task Force Monitor to keep track of their work.
             </p>
-            <button
-              onClick={() => navigate(user ? '/' : '/auth')}
-              className="flex items-center gap-2 px-8 py-4 bg-github-green hover:bg-github-green-hover text-white rounded-full transition-colors text-lg mx-auto"
-            >
-              {user ? 'Go to Dashboard' : 'Get Started for Free'} <ChevronRight />
-            </button>
+            
+            {!user ? (
+              <div className="flex flex-wrap justify-center gap-4">
+                <button
+                  onClick={() => {
+                    setAuthMode('signup');
+                    setShowAuthForm(true);
+                  }}
+                  className="flex items-center gap-2 px-8 py-4 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-lg"
+                >
+                  Sign Up Free <ChevronRight />
+                </button>
+                <button
+                  onClick={() => {
+                    setAuthMode('login');
+                    setShowAuthForm(true);
+                  }}
+                  className="flex items-center gap-2 px-8 py-4 bg-github-card border border-github-border text-github-text hover:text-white rounded-md transition-colors text-lg"
+                >
+                  Sign In <LogIn size={18} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="flex items-center gap-2 px-8 py-4 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-lg mx-auto"
+              >
+                Go to Dashboard <ChevronRight />
+              </button>
+            )}
           </motion.div>
         </div>
       </main>

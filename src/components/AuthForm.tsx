@@ -11,6 +11,7 @@ interface AuthFormProps {
   compact?: boolean;
   showWelcomeText?: boolean;
   onSuccess?: () => void;
+  initialMode?: 'login' | 'signup';
 }
 
 export function AuthForm({ 
