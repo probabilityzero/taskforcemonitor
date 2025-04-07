@@ -205,7 +205,7 @@ export default function Projects() {
                   >
                     {getStatusIcon(status)}
                     <span>{getStatusText(status)}</span>
-                    {selectedStatuses.includes(status) && <Check size={12} />}
+                    {selectedStatuses.includes(status)}
                   </button>
                 ))}
               </div>
