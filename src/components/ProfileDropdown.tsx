@@ -118,50 +118,15 @@ export function ProfileDropdown({ onClose, user }: ProfileDropdownProps) {
           className="flex items-center w-full px-4 py-2 text-sm text-github-text hover:bg-github-border transition-colors"
         >
           <Bookmark className="w-4 h-4 mr-3 opacity-70" /> 
-          <span>Saved items</span>
+          <span>Shared Projects</span>
         </Link>
         
-        <button 
-          className="flex items-center justify-between w-full px-4 py-2 text-sm text-github-text hover:bg-github-border transition-colors"
-        >
-          <span className="flex items-center">
-            {notificationsEnabled ? 
-              <Bell className="w-4 h-4 mr-3 opacity-70" /> : 
-              <BellOff className="w-4 h-4 mr-3 opacity-70" />
-            }
-            <span>Notifications</span>
-          </span>
-          <div className={cn(
-            "w-8 h-4 rounded-full relative transition-colors",
-            notificationsEnabled ? "bg-github-green" : "bg-github-border/50"
-          )}>
-            <div className={cn(
-              "absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all",
-              notificationsEnabled ? "left-[18px]" : "left-0.5"
-            )}></div>
-          </div>
-        </button>
-        
-        <button 
-          className="flex items-center justify-between w-full px-4 py-2 text-sm text-github-text hover:bg-github-border transition-colors"
-        >
-          <span className="flex items-center">
-            {isDarkMode ? 
-              <Moon className="w-4 h-4 mr-3 opacity-70" /> : 
-              <Sun className="w-4 h-4 mr-3 opacity-70" />
-            }
-            <span>Appearance</span>
-          </span>
-          <span className="text-xs text-github-text/60">
-            {isDarkMode ? "Dark" : "Light"}
-          </span>
-        </button>
       </div>
 
       {/* Secondary items */}
       <div className="border-t border-github-border/30 py-1">
         <Link
-          to="https://github.com/tarique/taskforcemonitor"
+          to="https://github.com/probabilityzero/taskforcemonitor"
           target="_blank"
           className="flex items-center w-full px-4 py-2 text-sm text-github-text hover:bg-github-border transition-colors"
         >
@@ -170,7 +135,7 @@ export function ProfileDropdown({ onClose, user }: ProfileDropdownProps) {
         </Link>
         
         <Link
-          to="https://essentials.tarique.me"
+          to="https://tarique.me"
           target="_blank"
           className="flex items-center w-full px-4 py-2 text-sm text-github-text hover:bg-github-border transition-colors"
         >
