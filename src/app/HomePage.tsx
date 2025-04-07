@@ -13,7 +13,6 @@ import type { Project } from '../types';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Footer } from '../components/Footer';
 import { ProfileDropdown } from '../components/ProfileDropdown';
 
 const DEFAULT_CATEGORIES = [
@@ -337,7 +336,6 @@ function HomePage() {
           </motion.div>
         )}
       </div>
-      <Footer />
     </div>
   );
 }

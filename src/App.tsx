@@ -5,6 +5,7 @@ import TermsOfService from './app/TermsOfService';
 import PrivacyPolicy from './app/PrivacyPolicy';
 import AccountSettings from './app/AccountSettings';
 import HomePage from './app/HomePage';
+import WelcomePage from './app/WelcomePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { supabase } from './lib/supabase';
 
@@ -51,13 +52,14 @@ function AppWrapper() {
     <Router>
       <Routes>
         {/* Public routes */}
-        <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
+        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <WelcomePage />} />
+        <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <Auth />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/dashboard" element={<HomePage />} />
           <Route path="/account-settings" element={<AccountSettings />} />
         </Route>
         
