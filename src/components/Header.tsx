@@ -270,7 +270,7 @@ export function Header({
             onClick={stopPropagation}
           >
             {/* Mobile menu header */}
-            <div className="flex items-center justify-between h-15 px-4 border-b border-github-border">
+            <div className="flex items-center justify-between h-14 px-4 border-b border-github-border">
               <div className="flex items-center">
                 <img 
                   src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg"
