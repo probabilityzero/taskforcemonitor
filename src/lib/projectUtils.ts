@@ -1,6 +1,5 @@
 import { supabase } from './supabase';
 import type { Project, ProjectStatus, ProjectPriority, NoteEntry } from '../types';
-import { randomUUID } from 'crypto';
 
 // Re-export NoteEntry so it can be imported from projectUtils
 export type { NoteEntry };
@@ -50,8 +49,8 @@ export async function validateShareAccess(projectId: string, shareToken: string)
  * Generate a share link for a project
  */
 export async function generateShareLink(projectId: string): Promise<string> {
-  // Generate a unique ID and make it shorter (first 10 chars)
-  const shareToken = randomUUID().replace(/-/g, '').substring(0, 10);
+  // Generate a simple random token
+  const shareToken = Math.random().toString(36).substring(2, 12);
   
   const { data, error } = await supabase
     .from('projects')
