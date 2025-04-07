@@ -8,8 +8,6 @@
 
 body {
   @apply bg-github-bg text-github-text;
-  position: relative;
-  overflow: hidden;
 }
 
 body::before {
