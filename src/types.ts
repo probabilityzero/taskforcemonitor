@@ -1,14 +1,16 @@
-export type ProjectStatus = 'idea' | 'started' | 'completed' | 'abandonded';
+export type ProjectStatus = 'concept' | 'started' | 'completed' | 'abandonded';
+
 export type ProjectCategory = 'research' | 'analysis' | 'engineering' | 'miscellaneous';
 
 export interface Project {
   id: string;
-  created_at: string;
   name: string;
-  description: string | null;
+  description: string;
   categories: ProjectCategory;
-  link: string | null;
+  link: string;
   status: ProjectStatus;
   tags: string;
-  comments: string | null;
+  comments: string;
+  created_at: string;
+  user_id: string;
 }

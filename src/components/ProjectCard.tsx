@@ -1,6 +1,6 @@
 import React from 'react';
 import { PlayCircle, ArrowUpRight, CheckCircle, Flag, Lightbulb, Calendar } from 'lucide-react';
-import type { Project } from '../types';
+import type { Project, ProjectStatus } from '../types'; // Import ProjectStatus type
 import { cn } from '../lib/utils';
 
 interface ProjectCardProps {
@@ -13,8 +13,8 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, onEdit, onTagClick }: ProjectCardProps) {
-  // Define statusOptions with correct type to match project.status
-  const statusOptions: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
+  // Define statusOptions with correct type mapping
+  const statusOptions: Record<ProjectStatus, { label: string; icon: React.ReactNode; color: string }> = {
     'concept': { label: 'Concept', icon: <Lightbulb size={12} />, color: '#b388eb' },
     'started': { label: 'Started', icon: <PlayCircle size={12} />, color: '#238636' },
     'completed': { label: 'Completed', icon: <CheckCircle size={12} />, color: '#1f6feb' },
@@ -44,8 +44,8 @@ export function ProjectCard({ project, onEdit, onTagClick }: ProjectCardProps) {
             }
           )}
         >
-          {statusOptions[project.status]?.icon}
-          <span className="md:inline">{statusOptions[project.status]?.label}</span>
+          {statusOptions[project.status].icon}
+          <span className="md:inline">{statusOptions[project.status].label}</span>
         </button>
       </div>
       
@@ -53,7 +53,7 @@ export function ProjectCard({ project, onEdit, onTagClick }: ProjectCardProps) {
       
       <div className="flex justify-between items-center" style={{ marginBottom: '4px' }}>
         <div className="flex flex-wrap gap-1">
-          {project.tags.split(',').map((tag, index) => (
+          {project.tags.split(',').filter(tag => tag.trim()).map((tag, index) => (
             <button
               key={index}
               onClick={() => onTagClick(tag.trim())}

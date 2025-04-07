@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { Eye, EyeOff } from 'lucide-react';
 import { FaGoogle, FaGithub, FaLinkedin } from 'react-icons/fa';
-import Logo from '../assets/logo.svg?react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Footer } from './../components/Footer';
 
@@ -18,6 +17,8 @@ function Auth() {
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const location = useLocation();
+  const from = (location.state as any)?.from?.pathname || '/';
 
   const handleSignIn = async (provider: 'google' | 'github' | 'linkedin' | null = null) => {
     setLoading(true);
@@ -46,17 +47,21 @@ function Auth() {
           return;
         }
         
-        const { error: passwordError } = await supabase.auth.signInWithPassword({
+        const { error: passwordError, data } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+        
         if (passwordError) {
+          console.error('Sign-in error:', passwordError);
           setError(passwordError.message);
         } else {
-          navigate('/');
+          console.log('Login successful, redirecting to:', from);
+          navigate(from);
         }
       }
     } catch (err: any) {
+      console.error('Sign-in exception:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -66,6 +71,13 @@ function Auth() {
   const handleSignUp = async () => {
     setLoading(true);
     setError(null);
+    
+    if (!email || !password || !name) {
+      setError("Please fill in all fields");
+      setLoading(false);
+      return;
+    }
+    
     try {
       const { error: signUpError, data } = await supabase.auth.signUp({
         email,
@@ -74,8 +86,10 @@ function Auth() {
           data: {
             full_name: name,
           },
+          emailRedirectTo: `${window.location.origin}/auth`,
         },
       });
+      
       if (signUpError) {
         console.error('Sign-up error:', signUpError);
         if (signUpError.message.includes('AuthWeakPasswordError')) {
@@ -86,13 +100,16 @@ function Auth() {
       } else {
         console.log('Sign-up successful:', data);
         // Check if email confirmation is required
-        if (data.user && data.session) {
-          // If we have a session, user can be logged in immediately
+        if (data.session) {
+          // If we have a session, user can log in immediately
           navigate('/');
         } else {
           // User needs to confirm email
-          setToast('Please check your email to confirm your account before logging in.');
-          setShowCreateAccount(false); // Switch back to login form
+          setToast('Account created! Please check your email to confirm your account before logging in.');
+          setShowCreateAccount(false);
+          setEmail('');
+          setPassword('');
+          setName('');
         }
       }
     } catch (err: any) {
@@ -106,7 +123,11 @@ function Auth() {
   return (
     <div className="min-h-screen bg-github-bg-gradient flex flex-col items-center justify-between">
       <div className="mb-8 flex mt-12 md:mt-20">
-        <Logo className="w-10 h-10 mr-2" />
+        <img 
+          src="/assets/logo.svg" 
+          alt="Task Force Monitor Logo" 
+          className="w-10 h-10 mr-2"
+        />
         <h1 className="text-2xl font-bold text-github-text">Task Force <span className="font-thin">Monitor</span></h1>
       </div>
       <div className="bg-github-card p-6 rounded-lg shadow-md w-full max-w-md border border-github-border">
