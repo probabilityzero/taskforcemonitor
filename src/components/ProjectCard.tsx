@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Check, 
   Clock, 
-  AlertTriangle, 
   Star, 
   StarHalf, 
   ExternalLink,
@@ -16,9 +14,10 @@ import {
   MessageSquare,
   Calendar,
   Link as LinkIcon,
-  ChevronRight
+  ChevronRight,
+  PlusCircle
 } from 'lucide-react';
-import type { Project, ProjectStatus } from '../types';
+import type { Project, ProjectStatus, NoteEntry } from '../types';
 import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 
@@ -26,7 +25,7 @@ interface ProjectCardProps {
   project: Project;
   onClick?: () => void;
   onStatusChange?: (project: Project, newStatus: ProjectStatus) => Promise<void>;
-  onNotesUpdate?: (project: Project, newNotes: string) => Promise<void>;
+  onNotesUpdate?: (project: Project, notes: NoteEntry[]) => Promise<void>;
   onLinkUpdate?: (project: Project, newLink: string) => Promise<void>;
   setToast?: (message: string) => void;
 }
@@ -42,9 +41,29 @@ function ProjectCard({
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isUpdatingNotes, setIsUpdatingNotes] = useState(false);
   const [isUpdatingLink, setIsUpdatingLink] = useState(false);
-  const [notes, setNotes] = useState(project.comments || '');
+  const [newNote, setNewNote] = useState('');
   const [link, setLink] = useState(project.link || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Parse notes from project.comments or initialize empty array
+  const [notes, setNotes] = useState<NoteEntry[]>(() => {
+    if (!project.comments) return [];
+    try {
+      const parsed = JSON.parse(project.comments);
+      return Array.isArray(parsed) ? parsed : [{
+        text: project.comments,
+        date: project.created_at,
+        id: '1'
+      }];
+    } catch (e) {
+      // If not valid JSON, create a single note entry
+      return [{
+        text: project.comments,
+        date: project.created_at,
+        id: '1'
+      }];
+    }
+  });
 
   const getStatusIcon = (status: string, size = 14) => {
     switch (status) {
@@ -97,6 +116,17 @@ function ProjectCard({
     }).format(date);
   };
 
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
+
   const tagsList = project.tags && typeof project.tags === 'string' 
     ? project.tags.split(',').filter(Boolean).map(tag => tag.trim()) 
     : Array.isArray(project.tags) 
@@ -114,7 +144,10 @@ function ProjectCard({
         setIsSubmitting(true);
         const { error } = await supabase
           .from('projects')
-          .update({ status: newStatus })
+          .update({ 
+            status: newStatus,
+            updated_at: new Date().toISOString()
+          })
           .eq('id', project.id);
           
         if (error) throw error;
@@ -132,18 +165,33 @@ function ProjectCard({
     }
   };
 
-  const handleSaveNotes = async () => {
+  const handleAddNote = async () => {
+    if (newNote.trim() === '') return;
+    
+    const newEntry: NoteEntry = {
+      id: Date.now().toString(),
+      text: newNote.trim(),
+      date: new Date().toISOString()
+    };
+    
+    const updatedNotes = [...notes, newEntry];
+    
     if (!onNotesUpdate) {
       try {
         setIsSubmitting(true);
         const { error } = await supabase
           .from('projects')
-          .update({ comments: notes })
+          .update({ 
+            comments: JSON.stringify(updatedNotes),
+            updated_at: new Date().toISOString()
+          })
           .eq('id', project.id);
           
         if (error) throw error;
         
-        if (setToast) setToast('Project notes updated');
+        setNotes(updatedNotes);
+        setNewNote('');
+        if (setToast) setToast('Note added');
         setIsUpdatingNotes(false);
       } catch (error: any) {
         if (setToast) setToast(`Error: ${error.message}`);
@@ -151,8 +199,34 @@ function ProjectCard({
         setIsSubmitting(false);
       }
     } else {
-      await onNotesUpdate(project, notes);
+      await onNotesUpdate(project, updatedNotes);
+      setNotes(updatedNotes);
+      setNewNote('');
       setIsUpdatingNotes(false);
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    const updatedNotes = notes.filter(note => note.id !== noteId);
+    
+    try {
+      setIsSubmitting(true);
+      const { error } = await supabase
+        .from('projects')
+        .update({ 
+          comments: JSON.stringify(updatedNotes),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', project.id);
+        
+      if (error) throw error;
+      
+      setNotes(updatedNotes);
+      if (setToast) setToast('Note removed');
+    } catch (error: any) {
+      if (setToast) setToast(`Error: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -162,7 +236,10 @@ function ProjectCard({
         setIsSubmitting(true);
         const { error } = await supabase
           .from('projects')
-          .update({ link })
+          .update({ 
+            link,
+            updated_at: new Date().toISOString()
+          })
           .eq('id', project.id);
           
         if (error) throw error;
@@ -344,7 +421,9 @@ function ProjectCard({
                       <div className="flex items-center gap-2 text-sm text-github-text">
                         <Calendar size={14} /> Created: {formatDate(project.created_at)}
                       </div>
-                      {project.updated_at && (
+                      
+                      {/* Only display updated_at if it exists and is different from created_at */}
+                      {project.updated_at && new Date(project.updated_at).getTime() > new Date(project.created_at).getTime() && (
                         <div className="flex items-center gap-2 text-sm text-github-text">
                           <Clock size={14} /> Updated: {formatDate(project.updated_at)}
                         </div>
@@ -447,33 +526,32 @@ function ProjectCard({
 
                 {/* Notes Section */}
                 <div className="bg-github-fg rounded-md p-4 border border-github-border mb-4 flex-1">
-                  <div className="flex justify-between items-center mb-2">
+                  <div className="flex justify-between items-center mb-3">
                     <h3 className="text-github-text text-sm flex items-center gap-2">
                       <MessageSquare size={14} /> Notes
                     </h3>
-                    {!isUpdatingNotes && (
-                      <button 
-                        className="text-github-text hover:text-white transition-colors text-xs"
-                        onClick={() => setIsUpdatingNotes(true)}
-                      >
-                        {project.comments ? 'Edit' : 'Add notes'}
-                      </button>
-                    )}
+                    <button 
+                      className="text-github-text hover:text-white transition-colors text-xs flex items-center gap-1"
+                      onClick={() => setIsUpdatingNotes(!isUpdatingNotes)}
+                    >
+                      <PlusCircle size={12} /> Add note
+                    </button>
                   </div>
 
-                  {isUpdatingNotes ? (
-                    <div className="flex flex-col gap-2">
+                  {/* Add new note */}
+                  {isUpdatingNotes && (
+                    <div className="flex flex-col gap-2 mb-4 bg-github-card p-3 rounded-md border border-github-border">
                       <textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder="Add notes about this project..."
-                        className="w-full bg-github-input border border-github-border rounded-md text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-github-green min-h-[120px]"
+                        value={newNote}
+                        onChange={(e) => setNewNote(e.target.value)}
+                        placeholder="Add a new note about this project..."
+                        className="w-full bg-github-input border border-github-border rounded-md text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-github-green min-h-[80px]"
                       />
                       <div className="flex justify-end gap-2 mt-1">
                         <button
                           className="px-2 py-1 text-xs text-github-text hover:text-white transition-colors"
                           onClick={() => {
-                            setNotes(project.comments || '');
+                            setNewNote('');
                             setIsUpdatingNotes(false);
                           }}
                           disabled={isSubmitting}
@@ -482,15 +560,45 @@ function ProjectCard({
                         </button>
                         <button
                           className="px-2 py-1 text-xs bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors"
-                          onClick={handleSaveNotes}
-                          disabled={isSubmitting}
+                          onClick={handleAddNote}
+                          disabled={isSubmitting || newNote.trim() === ''}
                         >
-                          Save
+                          Add Note
                         </button>
                       </div>
                     </div>
-                  ) : project.comments ? (
-                    <p className="text-white text-sm whitespace-pre-wrap">{project.comments}</p>
+                  )}
+
+                  {/* Notes history */}
+                  {notes.length > 0 ? (
+                    <div className="space-y-3 mt-2">
+                      {notes.map((note, index) => (
+                        <div 
+                          key={note.id || index} 
+                          className={cn(
+                            "p-3 rounded-md border relative",
+                            index === notes.length - 1 
+                              ? "bg-github-card/60 border-github-border" 
+                              : "bg-github-card/30 border-github-border/50"
+                          )}
+                        >
+                          <div className="text-white text-sm whitespace-pre-wrap mb-2">
+                            {note.text}
+                          </div>
+                          <div className="flex justify-between items-center text-xs text-github-text mt-2 pt-2 border-t border-github-border/30">
+                            <span>{formatDateTime(note.date || project.created_at)}</span>
+                            
+                            <button
+                              className="text-github-text hover:text-red-400 transition-colors"
+                              onClick={() => handleDeleteNote(note.id || index.toString())}
+                              disabled={isSubmitting}
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   ) : (
                     <p className="text-github-text/50 text-sm italic">No notes added</p>
                   )}
