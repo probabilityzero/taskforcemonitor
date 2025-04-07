@@ -317,14 +317,6 @@ function Timeline() {
       <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-white">Activity Timeline</h1>
-          
-          <button
-            onClick={handleOpenProjectForm}
-            className="flex items-center gap-1 px-3 py-1.5 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span>New Project</span>
-          </button>
         </div>
         
         {/* Only show the real filter buttons when not loading */}
@@ -339,7 +331,7 @@ function Timeline() {
                   : "bg-transparent text-github-text border-github-border hover:border-github-border-hover"
               )}
             >
-              All
+              All Activities
             </button>
             
             {['create', 'note', 'link', 'start', 'complete', 'abandon'].map(type => (

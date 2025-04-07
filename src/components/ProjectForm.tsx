@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, PlayCircle, CheckCircle, Flag, Lightbulb, Calendar, MessageSquare } from 'lucide-react';
+import { X, PlayCircle, CheckCircle, Flag, Lightbulb, Calendar, MessageSquare, Link as LinkIcon, Tag, Star } from 'lucide-react';
 import type { Project, ProjectStatus, ProjectPriority } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Select } from './Select';
@@ -24,6 +24,7 @@ export function ProjectForm({
   customCategories,
   onAddCategory 
 }: ProjectFormProps) {
+  // State initialization
   const [formData, setFormData] = useState({
     name: project?.name || initialData?.name || '',
     description: project?.description || initialData?.description || '',
@@ -54,8 +55,8 @@ export function ProjectForm({
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
   const [link, setLink] = useState(project?.link || initialData?.link || '');
-  const [activeTab, setActiveTab] = useState<'general' | 'advanced'>('general');
 
+  // Check for mobile view
   useEffect(() => {
     const checkMobileView = () => {
       setIsMobileView(window.innerWidth < 768);
@@ -66,6 +67,7 @@ export function ProjectForm({
     return () => window.removeEventListener('resize', checkMobileView);
   }, []);
 
+  // Fetch all tags for suggestions
   useEffect(() => {
     const fetchAllTags = async () => {
       const { data, error } = await supabase
@@ -102,6 +104,7 @@ export function ProjectForm({
     fetchAllTags();
   }, []);
 
+  // Tag input handlers
   const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setTagInput(value);
@@ -131,6 +134,7 @@ export function ProjectForm({
     setTagList(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -149,6 +153,7 @@ export function ProjectForm({
     });
   };
 
+  // Status and priority options
   const statusOptions = [
     { value: 'concept', label: 'Concept', icon: <Lightbulb size={14} />, color: '#b388eb' },
     { value: 'started', label: 'In Progress', icon: <PlayCircle size={14} />, color: '#238636' },
@@ -162,6 +167,7 @@ export function ProjectForm({
     { value: 'high', label: 'High', color: '#f85149' },
   ];
 
+  // Delete project
   const handleDeleteProject = async () => {
     if (!project) return;
     try {
@@ -183,6 +189,7 @@ export function ProjectForm({
     }
   };
 
+  // Tag suggestion handlers
   const handleTagClick = (tag: string) => {
     setTagList(prev => [...prev, tag]);
     setTagInput('');
@@ -208,108 +215,103 @@ export function ProjectForm({
 
   return (
     <motion.div
-      className="bg-github-card rounded-lg w-full max-w-2xl relative border border-github-border p-3 md:p-6"
+      className="bg-github-card rounded-lg w-full max-w-xl relative border border-github-border"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.15 }}
       layout
+      onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
     >
-      <div className="flex justify-between items-center mb-3 md:mb-4">
-        <h2 className="text-xl font-bold text-github-text">
-          {project ? 'Edit Project' : 'Create Project'}
-        </h2>
-        <button 
-          className="text-github-text hover:text-white transition-colors"
-          onClick={onClose}
-        >
-          <X size={18} />
-        </button>
-      </div>
+      <div className="p-4 md:p-6">
+        <div className="flex justify-between items-center mb-5">
+          <h2 className="text-xl font-bold text-white">
+            {project ? 'Edit Project' : 'Create Project'}
+          </h2>
+          <button 
+            className="text-github-text hover:text-white transition-colors"
+            onClick={onClose}
+          >
+            <X size={18} />
+          </button>
+        </div>
 
-      {/* Tabs for form sections */}
-      <div className="flex border-b border-github-border mb-4">
-        <button
-          className={cn(
-            "px-4 py-2 text-sm font-medium transition-colors relative",
-            activeTab === 'general' 
-              ? "text-white"
-              : "text-github-text hover:text-white"
+        <form onSubmit={handleSubmit}>
+          {formError && (
+            <div className="mb-4 p-2 bg-red-900/20 border border-red-500/30 rounded-md text-red-400 text-sm">
+              {formError}
+            </div>
           )}
-          onClick={() => setActiveTab('general')}
-        >
-          General
-          {activeTab === 'general' && (
-            <motion.div 
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-github-green"
-              layoutId="activeTab"
-            />
-          )}
-        </button>
-        <button
-          className={cn(
-            "px-4 py-2 text-sm font-medium transition-colors relative",
-            activeTab === 'advanced' 
-              ? "text-white"
-              : "text-github-text hover:text-white"
-          )}
-          onClick={() => setActiveTab('advanced')}
-        >
-          Advanced
-          {activeTab === 'advanced' && (
-            <motion.div 
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-github-green"
-              layoutId="activeTab"
-            />
-          )}
-        </button>
-      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {formError && <div className="text-red-500 mb-4">{formError}</div>}
+          <div className="space-y-5">
+            {/* Project Name - Always first and prominent */}
+            <div>
+              <label className="block text-sm font-medium mb-1.5 text-github-text">Project Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full p-2 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm"
+                required
+              />
+            </div>
 
-        {/* General Tab */}
-        {activeTab === 'general' && (
-          <div className="space-y-4">
+            {/* Status and Priority */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Name */}
-              <div className="flex-1">
-                <label className="block text-sm font-medium mb-1 text-github-text">Project Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full p-2 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm"
-                  required
-                />
-              </div>
-
-              {/* Status */}
               <div>
-                <label className="block text-sm font-medium mb-1 text-github-text">Status</label>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <label className="text-sm font-medium text-github-text">Status</label>
+                  {statusOptions.find(o => o.value === formData.status)?.icon}
+                </div>
                 <Select
                   options={statusOptions}
                   value={formData.status}
                   onChange={(value) => setFormData(prev => ({ ...prev, status: value as ProjectStatus }))}
                 />
               </div>
+              
+              <div>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <label className="text-sm font-medium text-github-text">Priority</label>
+                  <Star size={14} className="text-github-text" />
+                </div>
+                <Select
+                  options={priorityOptions}
+                  value={formData.priority}
+                  onChange={(value) => setFormData(prev => ({ ...prev, priority: value as ProjectPriority }))}
+                />
+              </div>
             </div>
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium mb-1 text-github-text">Description</label>
+              <label className="block text-sm font-medium mb-1.5 text-github-text">Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full p-2 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm h-20"
+                className="w-full p-2 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm"
                 rows={3}
+              />
+            </div>
+
+            {/* Category */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <label className="text-sm font-medium text-github-text">Category</label>
+                <Tag size={14} className="text-github-text" />
+              </div>
+              <CategoryManager
+                categories={customCategories}
+                selectedCategory={formData.categories}
+                onSelectCategory={handleSelectCategory}
+                onAddCategory={onAddCategory}
               />
             </div>
 
             {/* Topics/Tags */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-github-text">Topics</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-sm font-medium text-github-text">Topics</label>
               </div>
               <div className="relative">
                 <input
@@ -317,7 +319,7 @@ export function ProjectForm({
                   value={tagInput}
                   onChange={handleTagInputChange}
                   onKeyDown={handleTagInputKeyDown}
-                  placeholder="press space to add tag"
+                  placeholder="Press space to add tag"
                   className="w-full p-2 rounded-md border focus:border-github-border-light bg-github-input text-github-text placeholder:text-github-text/50 text-sm"
                   ref={tagInputRef}
                   onBlur={handleBlur}
@@ -337,132 +339,115 @@ export function ProjectForm({
                   </div>
                 )}
               </div>
-              <div className="flex flex-wrap gap-1 mt-2">
-                {tagList.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-0.5 bg-github-input rounded-md text-xs text-github-text border border-github-border flex items-center gap-1"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(index)}
-                      className="text-github-text hover:text-white transition-colors"
+              {tagList.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {tagList.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-0.5 bg-github-input rounded-md text-xs text-github-text border border-github-border flex items-center gap-1"
                     >
-                      <X size={10} />
-                    </button>
-                  </span>
-                ))}
-              </div>
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(index)}
+                        className="text-github-text hover:text-white transition-colors"
+                      >
+                        <X size={10} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Repository Link */}
-            <div className="flex items-center gap-2 mb-4 mt-2">
-              <div className="flex-1">
-                <div className="flex items-center mb-1">
-                  <label className="block text-sm font-medium text-github-text" htmlFor="link">
-                    Link to Project
-                  </label>
-                </div>
-                <input
-                  id="link"
-                  type="url"
-                  value={link}
-                  onChange={(e) => setLink(e.target.value)}
-                  className="w-full p-2 bg-github-input border border-github-border rounded-md text-white text-sm focus:outline-none focus:ring-1 focus:ring-github-green"
-                />
+            <div>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <label className="text-sm font-medium text-github-text" htmlFor="link">
+                  Link to Project
+                </label>
+                <LinkIcon size={14} className="text-github-text" />
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Advanced Tab */}
-        {activeTab === 'advanced' && (
-          <div className="space-y-4">
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium mb-1 text-github-text">Category</label>
-              <CategoryManager
-                categories={customCategories}
-                selectedCategory={formData.categories}
-                onSelectCategory={handleSelectCategory}
-                onAddCategory={onAddCategory}
-              />
-            </div>
-
-            {/* Priority */}
-            <div>
-              <label className="block text-sm font-medium mb-1 text-github-text">Priority</label>
-              <Select
-                options={priorityOptions}
-                value={formData.priority}
-                onChange={(value) => setFormData(prev => ({ ...prev, priority: value as ProjectPriority }))}
+              <input
+                id="link"
+                type="url"
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+                className="w-full p-2 bg-github-input border border-github-border rounded-md text-white text-sm focus:outline-none focus:ring-1 focus:ring-github-green"
+                placeholder="https://github.com/username/repository"
               />
             </div>
 
             {/* Notes */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-github-text">Notes</label>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <label className="text-sm font-medium text-github-text">Notes</label>
                 <MessageSquare size={14} className="text-github-text" />
               </div>
               <textarea
                 value={formData.comments}
                 onChange={(e) => setFormData(prev => ({ ...prev, comments: e.target.value }))}
-                className="w-full p-2 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm h-32"
-                rows={5}
+                className="w-full p-2 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm"
+                rows={4}
+                placeholder="Add any additional notes or context..."
               />
             </div>
 
             {/* Creation Date (read-only) */}
             {project && project.created_at && (
-              <div className="flex items-center gap-2 text-sm text-github-text mt-2">
+              <div className="flex items-center gap-2 text-sm text-github-text">
                 <Calendar size={14} /> Created: {new Date(project.created_at).toLocaleDateString()}
               </div>
             )}
-
-            {/* Delete Project Button */}
-            {project && (
-              <div className="pt-4 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  className="text-sm text-red-400 hover:text-red-300 transition-colors"
-                >
-                  Delete this project
-                </button>
-              </div>
-            )}
           </div>
-        )}
 
-        {/* Form Actions */}
-        <div className="flex justify-end items-center gap-2 pt-4 border-t border-github-border mt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-3 py-1.5 text-github-text hover:text-white transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-3 py-1.5 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors"
-          >
-            {project ? 'Update' : 'Create'}
-          </button>
-        </div>
-      </form>
+          {/* Form Actions */}
+          <div className="flex justify-between items-center pt-5 border-t border-github-border mt-5">
+            {/* Delete option (only for existing projects) */}
+            {project && (
+              <button
+                type="button"
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="text-sm text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+              >
+                <X size={14} className="text-red-400" />
+                Delete project
+              </button>
+            )}
+            
+            {/* If no project (new project) add spacer */}
+            {!project && <div></div>}
+            
+            {/* Action buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-3 py-1.5 text-github-text hover:text-white transition-colors rounded-md border border-transparent hover:border-github-border"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-3 py-1.5 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors"
+              >
+                {project ? 'Update' : 'Create'}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
 
       {/* Delete Confirmation Modal */}
       <AnimatePresence>
         {isDeleteModalOpen && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/20"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
+            onClick={() => setIsDeleteModalOpen(false)}
           >
             <motion.div
               className="bg-github-card rounded-lg p-6 border border-github-border max-w-md w-full"
@@ -470,6 +455,7 @@ export function ProjectForm({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.15 }}
+              onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-lg font-semibold mb-2 text-white">
                 Delete Project
@@ -480,7 +466,7 @@ export function ProjectForm({
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setIsDeleteModalOpen(false)}
-                  className="px-3 py-1.5 text-github-text hover:text-white transition-colors"
+                  className="px-3 py-1.5 text-github-text hover:text-white transition-colors rounded-md border border-transparent hover:border-github-border"
                 >
                   Cancel
                 </button>

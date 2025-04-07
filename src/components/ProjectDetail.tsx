@@ -14,7 +14,8 @@ import {
   MessageSquare,
   Calendar,
   Link as LinkIcon,
-  PlusCircle
+  PlusCircle,
+  NotebookPenIcon
 } from 'lucide-react';
 import type { Project, ProjectStatus, NoteEntry } from '../types';
 import { cn } from '../lib/utils';
@@ -437,7 +438,7 @@ function ProjectDetail({
             className="text-github-text hover:text-white transition-colors text-xs flex items-center gap-1"
             onClick={() => setIsUpdatingNotes(!isUpdatingNotes)}
           >
-            <PlusCircle size={12} /> Add note
+            <NotebookPenIcon size={12} /> Add note
           </button>
         </div>
 
@@ -520,7 +521,7 @@ function ProjectDetail({
   // If used as a modal
   return (
     <motion.div 
-      className="bg-github-card border-l border-github-border h-full overflow-y-auto md:w-1/2 w-full"
+      className="bg-github-card border-l border-github-border h-full overflow-y-auto md:w-2/3 lg:1/2 w-full"
       initial={{ x: "100%" }}
       animate={{ x: 0 }}
       exit={{ x: "100%" }}

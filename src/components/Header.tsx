@@ -10,7 +10,8 @@ import {
   Settings,
   History,
   LayoutDashboard,
-  GitBranch
+  GitBranch,
+  Plus
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -155,8 +156,8 @@ export function Header({
                 onClick={handleCreateNew}
                 className="hidden md:flex items-center gap-1 px-2 py-1 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
               >
-                <PlusCircle className="w-4 h-4" />
-                <span>New</span>
+                <Plus className="w-4 h-4" />
+                <span>New Project</span>
               </button>
             )}
 
@@ -316,7 +317,7 @@ export function Header({
                     className="w-full text-left px-3 py-2 rounded-md text-base text-github-text hover:text-white transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <PlusCircle size={16} />
+                      <Plus size={16} />
                       New Project
                     </div>
                   </button>
