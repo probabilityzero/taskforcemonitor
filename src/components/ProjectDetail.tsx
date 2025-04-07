@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Clock, 
   Star, 
   StarHalf, 
-  ExternalLink,
+  Share2,
   Lightbulb,
   PlayCircle,
   CheckCircle,
@@ -14,19 +14,23 @@ import {
   MessageSquare,
   Calendar,
   Link as LinkIcon,
-  PlusCircle,
-  NotebookPenIcon
+  NotebookPenIcon,
+  Copy,
+  Check
 } from 'lucide-react';
 import type { Project, ProjectStatus, NoteEntry } from '../types';
 import { cn } from '../lib/utils';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   addProjectNote, 
   deleteProjectNote,
   updateProjectStatus,
   updateProject,
-  parseProjectNotes
+  parseProjectNotes,
+  generateShareLink,
+  validateShareAccess
 } from '../lib/projectUtils';
+import { supabase } from '../lib/supabase';
 
 interface ProjectDetailProps {
   project: Project;
@@ -38,7 +42,6 @@ interface ProjectDetailProps {
   setToast?: (message: string) => void;
 }
 
-// Prevent closing when clicking inside the modal
 function ProjectDetail({ 
   project,
   onClose,
@@ -53,10 +56,22 @@ function ProjectDetail({
   const [newNote, setNewNote] = useState('');
   const [link, setLink] = useState(project.link || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareLink, setShareLink] = useState('');
+  const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Parse notes from project.comments using the utility
   const [notes, setNotes] = useState<NoteEntry[]>(() => parseProjectNotes(project));
+
+  useEffect(() => {
+    // Reset copied status after 2 seconds
+    if (copied) {
+      const timer = setTimeout(() => setCopied(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copied]);
 
   const getStatusIcon = (status: string, size = 14) => {
     switch (status) {
@@ -204,11 +219,27 @@ function ProjectDetail({
     }
   };
 
-  const handleOpenFullPage = () => {
-    if (isModal && onClose) {
-      onClose();
-      navigate(`/projects/${project.id}`);
+  const handleShareProject = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      // Generate or retrieve existing share token
+      const shareToken = project.share_token || await generateShareLink(project.id);
+      
+      const shareUrl = `${window.location.origin}/projects/${project.id}?secret=${shareToken}`;
+      setShareLink(shareUrl);
+      
+      setIsShareModalOpen(true);
+    } catch (error: any) {
+      if (setToast) setToast(`Error creating share link: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareLink);
+    setCopied(true);
   };
 
   const handleCloseAndGoBack = () => {
@@ -229,23 +260,7 @@ function ProjectDetail({
     <div className="p-4 sm:p-6 md:p-8 flex flex-col h-full" onClick={handleContentClick}>
       <div className="flex justify-between items-start mb-6">
         <h2 className="text-xl font-bold text-white flex-1">{project.name}</h2>
-        <div className="flex items-center gap-3">
-          {isModal && (
-            <button 
-              className="bg-github-fg hover:bg-github-fg/80 text-white rounded-md px-3 py-1 text-sm flex items-center gap-1 transition-colors"
-              onClick={handleOpenFullPage}
-            >
-              <ExternalLink size={14} /> Open Full View
-            </button>
-          )}
-          {onEdit && (
-            <button 
-              className="bg-github-fg hover:bg-github-fg/80 text-white rounded-md px-3 py-1 text-sm flex items-center gap-1 transition-colors"
-              onClick={onEdit}
-            >
-              <Edit size={14} /> Edit
-            </button>
-          )}
+        <div className="flex items-center gap-2">
           <button 
             className="text-github-text hover:text-white transition-colors"
             onClick={handleCloseAndGoBack}
@@ -255,8 +270,17 @@ function ProjectDetail({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {/* Status */}
+      {/* Top Grid: Description on left (2/3), Status on right (1/3) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* Description - takes 2/3 of the width */}
+        <div className="bg-github-fg rounded-md p-4 border border-github-border md:col-span-2">
+          <h3 className="text-github-text text-sm mb-2">Description</h3>
+          <p className="text-white text-sm whitespace-pre-wrap">
+            {project.description || "No description provided"}
+          </p>
+        </div>
+
+        {/* Status - takes 1/3 of the width */}
         <div className="bg-github-fg rounded-md p-4 border border-github-border">
           <h3 className="text-github-text text-sm mb-2">Status</h3>
           <div className="flex flex-col gap-2">
@@ -304,60 +328,12 @@ function ProjectDetail({
             </div>
           </div>
         </div>
-
-        {/* Dates and Tags */}
-        <div className="bg-github-fg rounded-md p-4 border border-github-border">
-          <div className="flex justify-between mb-2">
-            <h3 className="text-github-text text-sm">Details</h3>
-            <div className="flex items-center gap-1">
-              {getPriorityIcon(project.priority)}
-              <span className="text-github-text text-sm">{project.priority || 'Low'} priority</span>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-sm text-github-text">
-              <Calendar size={14} /> Created: {formatDate(project.created_at)}
-            </div>
-            
-            {/* Only display updated_at if it exists and is different from created_at */}
-            {project.updated_at && new Date(project.updated_at).getTime() > new Date(project.created_at).getTime() && (
-              <div className="flex items-center gap-2 text-sm text-github-text">
-                <Clock size={14} /> Updated: {formatDate(project.updated_at)}
-              </div>
-            )}
-          </div>
-
-          {tagsList.length > 0 && (
-            <div className="mt-3">
-              <h4 className="text-github-text text-xs mb-1">Tags</h4>
-              <div className="flex flex-wrap gap-1">
-                {tagsList.map((tag, index) => (
-                  <span 
-                    key={index} 
-                    className="bg-github-tag text-github-tag-text text-xs px-2 py-0.5 rounded-md"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* Description */}
-      <div className="bg-github-fg rounded-md p-4 border border-github-border mb-4">
-        <h3 className="text-github-text text-sm mb-2">Description</h3>
-        <p className="text-white text-sm whitespace-pre-wrap">
-          {project.description || "No description provided"}
-        </p>
-      </div>
-
-      {/* Repository Link */}
+      {/* Link to Repository */}
       <div className="bg-github-fg rounded-md p-4 border border-github-border mb-4">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-github-text text-sm">Repository Link</h3>
+          <h3 className="text-github-text text-sm">Link to Repository</h3>
           {!isUpdatingLink && (
             <button 
               className="text-github-text hover:text-white transition-colors text-xs"
@@ -375,6 +351,7 @@ function ProjectDetail({
               value={link}
               onChange={(e) => setLink(e.target.value)}
               className="w-full bg-github-input border border-github-border rounded-md text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-github-green"
+              placeholder="https://github.com/username/repository"
             />
             <div className="flex justify-end gap-2 mt-1">
               <button
@@ -407,14 +384,6 @@ function ProjectDetail({
             >
               {project.link}
             </a>
-            <a
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-github-input hover:bg-github-active-nav text-white rounded-md px-2 py-1 text-xs flex items-center gap-1 transition-colors ml-auto"
-            >
-              Visit <ExternalLink size={12} />
-            </a>
           </div>
         ) : (
           <p className="text-github-text/50 text-sm italic">No repository link added</p>
@@ -442,6 +411,7 @@ function ProjectDetail({
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
               className="w-full bg-github-input border border-github-border rounded-md text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-github-green min-h-[80px]"
+              placeholder="Add your notes here..."
             />
             <div className="flex justify-end gap-2 mt-1">
               <button
@@ -499,6 +469,104 @@ function ProjectDetail({
           <p className="text-github-text/50 text-sm italic">No notes added</p>
         )}
       </div>
+
+      {/* Details Section - moved to the bottom */}
+      <div className="bg-github-fg rounded-md p-4 border border-github-border mb-4">
+        <div className="flex justify-between mb-2">
+          <h3 className="text-github-text text-sm">Details</h3>
+          <div className="flex items-center gap-1">
+            {getPriorityIcon(project.priority)}
+            <span className="text-github-text text-sm">{project.priority || 'Low'} priority</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-sm text-github-text">
+            <Calendar size={14} /> Created: {formatDate(project.created_at)}
+          </div>
+          
+          {/* Only display updated_at if it exists and is different from created_at */}
+          {project.updated_at && new Date(project.updated_at).getTime() > new Date(project.created_at).getTime() && (
+            <div className="flex items-center gap-2 text-sm text-github-text">
+              <Clock size={14} /> Updated: {formatDate(project.updated_at)}
+            </div>
+          )}
+        </div>
+
+        {tagsList.length > 0 && (
+          <div className="mt-3">
+            <h4 className="text-github-text text-xs mb-1">Tags</h4>
+            <div className="flex flex-wrap gap-1">
+              {tagsList.map((tag, index) => (
+                <span 
+                  key={index} 
+                  className="bg-github-tag text-github-tag-text text-xs px-2 py-0.5 rounded-md"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex justify-end gap-3 mt-auto">
+        <button 
+          className="px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white rounded-md transition-colors flex items-center gap-1"
+          onClick={handleShareProject}
+          disabled={isSubmitting}
+        >
+          <Share2 size={14} /> Share
+        </button>
+        
+        {onEdit && (
+          <button 
+            className="px-3 py-1.5 bg-github-fg hover:bg-github-fg/80 text-white rounded-md transition-colors flex items-center gap-1"
+            onClick={onEdit}
+            disabled={isSubmitting}
+          >
+            <Edit size={14} /> Edit
+          </button>
+        )}
+      </div>
+
+      {/* Share Modal */}
+      {isShareModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/50" onClick={() => setIsShareModalOpen(false)}>
+          <div className="bg-github-card rounded-lg p-6 border border-github-border max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold mb-4 text-white">Share Project</h3>
+            <p className="text-github-text mb-4">
+              Share this link to give others access to view this project:
+            </p>
+            <div className="flex items-center gap-2 mb-4">
+              <input 
+                type="text" 
+                value={shareLink} 
+                readOnly
+                className="flex-1 bg-github-input border border-github-border rounded-md text-white px-3 py-2 text-sm focus:outline-none"
+              />
+              <button
+                onClick={handleCopyLink}
+                className="px-3 py-2 bg-github-fg hover:bg-github-fg/80 text-white rounded-md transition-colors"
+              >
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+              </button>
+            </div>
+            <p className="text-github-text/70 text-xs mb-4">
+              Anyone with this link can view this project. The link will remain valid until you regenerate it.
+            </p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setIsShareModalOpen(false)}
+                className="px-3 py-1.5 text-github-text hover:text-white transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 

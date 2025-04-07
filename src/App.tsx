@@ -16,6 +16,7 @@ import { ProjectForm } from './components/ProjectForm';
 import Auth from './app/Auth'; 
 import Projects from './app/Projects';
 import WelcomePage from './app/WelcomePage';
+import SharedProjectPage from './app/SharedProjectPage';
 
 export const AppContext = createContext<{
   user: any | null;
@@ -167,7 +168,10 @@ function AppContent() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
-          
+            
+          {/* Shared project route - accessible without auth */}
+          <Route path="/projects/:projectId" element={<SharedProjectPage />} />
+
           {/* Protected routes with persistent header */}
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>

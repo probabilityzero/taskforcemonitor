@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import type { Project, ProjectStatus, ProjectPriority, NoteEntry } from '../types';
+import { randomUUID } from 'crypto';
 
 // Re-export NoteEntry so it can be imported from projectUtils
 export type { NoteEntry };
@@ -16,6 +17,51 @@ export async function getProject(projectId: string) {
     
   if (error) throw error;
   return data as Project;
+}
+
+/**
+ * Get a project by ID and share token (for public access)
+ */
+export async function getSharedProject(projectId: string, shareToken: string) {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('id', projectId)
+    .eq('share_token', shareToken)
+    .single();
+    
+  if (error) throw error;
+  return data as Project;
+}
+
+/**
+ * Validate if a share token is valid for a project
+ */
+export async function validateShareAccess(projectId: string, shareToken: string): Promise<boolean> {
+  try {
+    const project = await getSharedProject(projectId, shareToken);
+    return !!project;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Generate a share link for a project
+ */
+export async function generateShareLink(projectId: string): Promise<string> {
+  // Generate a unique ID and make it shorter (first 10 chars)
+  const shareToken = randomUUID().replace(/-/g, '').substring(0, 10);
+  
+  const { data, error } = await supabase
+    .from('projects')
+    .update({ share_token: shareToken, updated_at: new Date().toISOString() })
+    .eq('id', projectId)
+    .select();
+    
+  if (error) throw error;
+  
+  return shareToken;
 }
 
 /**

@@ -187,54 +187,6 @@ export default function Projects() {
               className="block w-full pl-10 pr-3 py-2 border border-github-border rounded-md bg-github-input text-github-text focus:outline-none focus:ring-1 focus:ring-github-blue focus:border-github-blue"
             />
           </div>
-
-          <div className="flex flex-wrap gap-3">
-            <div>
-              <h3 className="text-sm font-medium text-github-text mb-2">Status</h3>
-              <div className="flex flex-wrap gap-2">
-                {['concept', 'started', 'completed', 'abandonded'].map(status => (
-                  <button
-                    key={status}
-                    onClick={() => handleStatusToggle(status)}
-                    className={cn(
-                      "flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors",
-                      selectedStatuses.includes(status)
-                        ? "bg-github-fg text-white"
-                        : "bg-transparent border border-github-border text-github-text hover:border-github-border-hover"
-                    )}
-                  >
-                    {getStatusIcon(status)}
-                    <span>{getStatusText(status)}</span>
-                    {selectedStatuses.includes(status)}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            {allCategories.length > 0 && (
-              <div>
-                <h3 className="text-sm font-medium text-github-text mb-2">Categories</h3>
-                <div className="flex flex-wrap gap-2">
-                  {allCategories.map(category => (
-                    <button
-                      key={category}
-                      onClick={() => handleCategoryToggle(category)} // category is now guaranteed to be string
-                      className={cn(
-                        "flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors",
-                        selectedCategories.includes(category)
-                          ? "bg-github-fg text-white"
-                          : "bg-transparent border border-github-border text-github-text hover:border-github-border-hover"
-                      )}
-                    >
-                      <Tag size={12} />
-                      <span>{category}</span>
-                      {selectedCategories.includes(category) && <Check size={12} />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Projects list */}

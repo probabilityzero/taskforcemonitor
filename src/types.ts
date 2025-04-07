@@ -16,6 +16,7 @@ export interface Project {
   created_at: string;
   updated_at?: string;
   user_id: string;
+  share_token?: string; // Added for project sharing functionality
 }
 
 export interface NoteEntry {
