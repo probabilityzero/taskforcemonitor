@@ -465,7 +465,7 @@ function Timeline() {
                           
                           <div className="mt-2">
                             <a 
-                              href={`/project/${event.project_id}`} 
+                              href={`/projects/${event.project_id}`} 
                               className="text-github-blue hover:underline text-xs"
                             >
                               View project

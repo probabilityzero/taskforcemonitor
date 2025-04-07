@@ -355,7 +355,7 @@ export default function Projects() {
                     layout
                   >
                     <Link 
-                      to={`/project/${project.id}`}
+                      to={`/projects/${project.id}`}
                       className="block px-4 py-3 hover:bg-github-bg transition-colors"
                     >
                       <div className="grid grid-cols-12 gap-4 items-center">

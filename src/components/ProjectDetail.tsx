@@ -207,7 +207,7 @@ function ProjectDetail({
   const handleOpenFullPage = () => {
     if (isModal && onClose) {
       onClose();
-      navigate(`/project/${project.id}`);
+      navigate(`/projects/${project.id}`);
     }
   };
 

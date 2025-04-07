@@ -50,7 +50,7 @@ export function Header({
     { path: '/', label: 'Overview', icon: <LayoutDashboard size={14} /> },
     { path: '/timeline', label: 'Timeline', icon: <History size={14} /> },
     { path: '/repositories', label: 'Repositories', icon: <GitBranch size={14} /> },
-    { path: '/project', label: 'Projects', icon: <Book size={14} /> },
+    { path: '/projects', label: 'Projects', icon: <Book size={14} /> },
   ];
 
   // Find current active index

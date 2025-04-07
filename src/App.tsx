@@ -172,11 +172,11 @@ function AppContent() {
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<HomePage />} />
-              <Route path="/project" element={<Projects />} /> 
+              <Route path="/projects" element={<Projects />} /> 
               <Route path="/timeline" element={<Timeline />} />
               <Route path="/repositories" element={<Repositories />} />
               <Route path="/account-settings" element={<AccountSettings />} />
-              <Route path="/project/:projectId" element={<ProjectDetailPage />} />
+              <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
               <Route path="/admin" element={<AdminPage />} />
             </Route> 
           </Route>

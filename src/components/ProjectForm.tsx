@@ -374,7 +374,6 @@ export function ProjectForm({
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
                 className="w-full p-2 bg-github-input border border-github-border rounded-md text-white text-sm focus:outline-none focus:ring-1 focus:ring-github-green"
-                placeholder="https://github.com/username/repository"
               />
             </div>
 
