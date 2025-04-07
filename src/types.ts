@@ -1,13 +1,12 @@
 export type ProjectStatus = 'concept' | 'started' | 'completed' | 'abandonded';
 
-// No longer limited to predefined categories
 export type ProjectCategory = string;
 
 export interface Project {
   id: string;
   name: string;
   description: string;
-  categories: ProjectCategory; // Keeps the same field name
+  categories: ProjectCategory; 
   link: string;
   status: ProjectStatus;
   tags: string;

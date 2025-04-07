@@ -30,6 +30,7 @@ export default {
         'github-header': '#161b22',
         'github-active-nav': '#0d1117',
         'github-avatar-bg': '#40464e',
+        'github-header-secondary': '#0d1017', // Add this new color
       },
       backgroundSize: {
         'google-auth-gradient': '400% 400%',

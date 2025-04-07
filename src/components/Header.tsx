@@ -8,7 +8,8 @@ import {
   ChevronDown,
   Book,
   Settings,
-  Home
+  Home,
+  Archive
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,9 +21,17 @@ interface HeaderProps {
   user: any;
   onCreateNew?: () => void;
   minimal?: boolean;
+  showArchive?: boolean;
+  onToggleArchive?: () => void;
 }
 
-export function Header({ user, onCreateNew, minimal = false }: HeaderProps) {
+export function Header({ 
+  user, 
+  onCreateNew, 
+  minimal = false,
+  showArchive = false,
+  onToggleArchive
+}: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -54,7 +63,8 @@ export function Header({ user, onCreateNew, minimal = false }: HeaderProps) {
 
   return (
     <header className="bg-github-header border-b border-github-border sticky top-0 z-40">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Top row - Logo, New button, and Profile */}
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
           {/* Mobile menu button */}
           <div className="flex md:hidden">
@@ -85,48 +95,7 @@ export function Header({ user, onCreateNew, minimal = false }: HeaderProps) {
             </Link>
           </div>
 
-          {/* Desktop navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            {user && (
-              <>
-                <Link 
-                  to="/dashboard" 
-                  className={cn(
-                    "px-3 py-1 rounded-md text-sm transition-colors",
-                    location.pathname === '/dashboard'
-                      ? "text-white bg-github-active-nav font-medium"
-                      : "text-github-text hover:text-white"
-                  )}
-                >
-                  Dashboard
-                </Link>
-                <Link 
-                  to="/projects" 
-                  className={cn(
-                    "px-3 py-1 rounded-md text-sm transition-colors",
-                    location.pathname === '/projects'
-                      ? "text-white bg-github-active-nav font-medium"
-                      : "text-github-text hover:text-white"
-                  )}
-                >
-                  Projects
-                </Link>
-                <Link 
-                  to="/tasks" 
-                  className={cn(
-                    "px-3 py-1 rounded-md text-sm transition-colors",
-                    location.pathname === '/tasks'
-                      ? "text-white bg-github-active-nav font-medium"
-                      : "text-github-text hover:text-white"
-                  )}
-                >
-                  Tasks
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Right side buttons */}
+          {/* Right side buttons - visible on all sizes */}
           <div className="flex items-center gap-2">
             {user && !minimal && (
               <button
@@ -134,7 +103,7 @@ export function Header({ user, onCreateNew, minimal = false }: HeaderProps) {
                   stopPropagation(e);
                   if (onCreateNew) onCreateNew();
                 }}
-                className="hidden md:flex items-center gap-1 px-2 py-1 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
+                className="flex items-center gap-1 px-2 py-1 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
               >
                 <PlusCircle className="w-4 h-4" />
                 <span>New</span>
@@ -190,16 +159,99 @@ export function Header({ user, onCreateNew, minimal = false }: HeaderProps) {
         </div>
       </div>
 
+      {/* Second row - Navigation items for desktop */}
+      {user && !minimal && (
+        <div className="hidden md:block border-t border-github-border bg-github-header-secondary">
+          <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-10">
+              {/* Navigation links */}
+              <div className="flex items-center space-x-1">
+                <Link 
+                  to="/dashboard" 
+                  className={cn(
+                    "px-3 py-1 rounded-md text-sm transition-colors",
+                    location.pathname === '/dashboard'
+                      ? "text-white bg-github-active-nav font-medium"
+                      : "text-github-text hover:text-white"
+                  )}
+                >
+                  Dashboard
+                </Link>
+                <Link 
+                  to="/projects" 
+                  className={cn(
+                    "px-3 py-1 rounded-md text-sm transition-colors",
+                    location.pathname === '/projects'
+                      ? "text-white bg-github-active-nav font-medium"
+                      : "text-github-text hover:text-white"
+                  )}
+                >
+                  Projects
+                </Link>
+                <Link 
+                  to="/tasks" 
+                  className={cn(
+                    "px-3 py-1 rounded-md text-sm transition-colors",
+                    location.pathname === '/tasks'
+                      ? "text-white bg-github-active-nav font-medium"
+                      : "text-github-text hover:text-white"
+                  )}
+                >
+                  Tasks
+                </Link>
+              </div>
+
+              {/* Archive toggle button */}
+              {onToggleArchive && (
+                <button
+                  onClick={onToggleArchive}
+                  className={cn(
+                    "flex items-center gap-1 px-2 py-1 rounded-md text-xs border transition-colors",
+                    showArchive 
+                      ? "bg-github-green text-white border-github-green" 
+                      : "bg-github-card text-github-text border-github-border"
+                  )}
+                >
+                  <Archive size={12} />
+                  <span>Show Archive</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile menu */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-github-header border-b border-github-border overflow-hidden"
+            initial={{ opacity: 0, x: -300 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -300 }}
+            className="fixed inset-y-0 left-0 md:hidden bg-github-header z-50 w-64 border-r border-github-border overflow-y-auto"
             onClick={stopPropagation}
           >
+            {/* Mobile menu header */}
+            <div className="flex items-center justify-between h-14 px-4 border-b border-github-border">
+              <div className="flex items-center">
+                <img 
+                  src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg"
+                  alt="Task Force Monitor" 
+                  className="w-5 h-5 mr-2" 
+                />
+                <h1 className="text-sm font-semibold text-github-text">
+                  Task Force <span className="font-thin">Monitor</span>
+                </h1>
+              </div>
+              <button
+                className="text-github-text hover:text-white transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Mobile menu content */}
             <div className="px-4 py-3 space-y-1">
               {user ? (
                 <>
@@ -233,6 +285,26 @@ export function Header({ user, onCreateNew, minimal = false }: HeaderProps) {
                       Projects
                     </div>
                   </Link>
+                  
+                  {/* Archive toggle in mobile menu */}
+                  {onToggleArchive && (
+                    <button
+                      onClick={() => {
+                        onToggleArchive();
+                        setIsMenuOpen(false);
+                      }}
+                      className={cn(
+                        "w-full text-left flex items-center gap-2 px-3 py-2 rounded-md text-base transition-colors",
+                        showArchive
+                          ? "text-github-green font-medium"
+                          : "text-github-text hover:text-white"
+                      )}
+                    >
+                      <Archive size={16} />
+                      {showArchive ? "Hide Archive" : "Show Archive"}
+                    </button>
+                  )}
+                  
                   <button
                     onClick={() => {
                       if (onCreateNew) onCreateNew();
@@ -260,6 +332,10 @@ export function Header({ user, onCreateNew, minimal = false }: HeaderProps) {
                       Settings
                     </div>
                   </Link>
+                  
+                  {/* Divider */}
+                  <div className="border-t border-github-border my-2"></div>
+                  
                   <button
                     onClick={() => {
                       handleSignOut();

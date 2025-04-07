@@ -173,9 +173,9 @@ export default function WelcomePage() {
       {/* Hero Section */}
       <main className="relative z-[1]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+          <div className="grid md:grid-cols-3 items-center gap-8 md:gap-12">
             {/* Left column - Text content */}
-            <div className="flex-1">
+            <div className="grid md:grid-cols-2">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -208,7 +208,7 @@ export default function WelcomePage() {
 
               {/* Features grid */}
               <motion.div 
-                className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-16"
+                className="grid grid-cols-2 gap-4 sm:gap-6 mt-16"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
@@ -228,27 +228,6 @@ export default function WelcomePage() {
                 ))}
               </motion.div>
             </div>
-            
-            {/* Right column - Auth form */}
-            {!user && (
-              <motion.div 
-                id="auth-section"
-                className="w-full md:w-96 md:flex-shrink-0 mt-12 md:mt-0"
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-              >
-                <AuthForm 
-                  compact={true} 
-                  showWelcomeText={false}
-                  onSuccess={onAuthSuccess}
-                  className="my-5 backdrop-blur-sm bg-github-card/80"
-                />
-                <div className="text-center text-github-text text-sm">
-                  By signing up, you agree to our <a href="/terms" className="text-github-blue hover:text-white">Terms of Service</a> and <a href="/privacy" className="text-github-blue hover:text-white">Privacy Policy</a>.
-                </div>
-              </motion.div>
-            )}
           </div>
         </div>
 
@@ -258,7 +237,7 @@ export default function WelcomePage() {
         {/* How it works section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           {/* Background for this section */}
-          <div className="absolute inset-0 bg-github-bg/70 backdrop-blur-md"></div>
+          <div className="absolute inset-0 backdrop-blur-md"></div>
           
           <div className="relative">
             <motion.div
@@ -312,7 +291,7 @@ export default function WelcomePage() {
 
         {/* CTA Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
-          <div className="absolute inset-0 bg-github-bg/90 backdrop-blur-md"></div>
+          <div className="absolute inset-0 backdrop-blur-md"></div>
           
           <motion.div
             className="bg-github-card/80 backdrop-blur-sm border border-github-border rounded-lg p-8 md:p-12 text-center relative"

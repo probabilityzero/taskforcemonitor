@@ -1,25 +1,13 @@
-import { useEffect, useState, useRef } from 'react';
-import {
-  PlusCircle,
-  X,
-  Archive
-} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, HelpCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ProjectCard } from '../components/ProjectCard';
 import { ProjectForm } from '../components/ProjectForm';
-import { CategoryManager } from '../components/CategoryManager';
 import { Header } from '../components/Header';
-import type { Project } from '../types';
+import type { Project, CategoryDisplay } from '../types';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-
-const DEFAULT_CATEGORIES = [
-  { id: 'research', label: 'Research', icon: 'BrainCircuit', color: '#6366f1' },
-  { id: 'analysis', label: 'Analysis', icon: 'LineChart', color: '#10b981' },
-  { id: 'engineering', label: 'Engineering', icon: 'Cpu', color: '#0ea5e9' },
-  { id: 'miscellaneous', label: 'Miscellaneous', icon: 'Puzzle', color: '#64748b' },
-];
+import * as LucideIcons from 'lucide-react';
 
 function HomePage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -28,18 +16,14 @@ function HomePage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
-  const categoryRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [showArchive, setShowArchive] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [key, setKey] = useState(0); // Keep this for ProjectFilters component
   const [user, setUser] = useState<any>(null);
-  const navigate = useNavigate();
   const [isBlurBackground, setIsBlurBackground] = useState(false);
-  const [customCategories, setCustomCategories] = useState(() => {
-    // Try to load from localStorage first
+  const [customCategories, setCustomCategories] = useState<CategoryDisplay[]>(() => {
+    // Load from localStorage but don't use defaults
     const saved = localStorage.getItem('projectCategories');
-    return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+    return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
@@ -48,7 +32,6 @@ function HomePage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial Session:', session);
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProjects(session.user);
@@ -56,7 +39,6 @@ function HomePage() {
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth State Change Session:', session);
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProjects(session.user);
@@ -76,7 +58,6 @@ function HomePage() {
     if (!currentUser) return;
     
     setLoading(true);
-    console.log("Fetching projects for user:", currentUser.id);
     
     const { data, error } = await supabase
       .from('projects')
@@ -85,13 +66,11 @@ function HomePage() {
       .order('status', { ascending: false });
 
     if (error) {
-      console.error('Error fetching projects:', error);
       setToast(`Error fetching projects: ${error.message}`);
       setLoading(false);
       return;
     }
 
-    console.log("Projects fetched:", data);
     setProjects(data || []);
     setLoading(false);
   }
@@ -100,7 +79,6 @@ function HomePage() {
     try {
       const projectData = {
         ...data,
-        categories: data.categories || 'miscellaneous',
         user_id: user.id
       };
 
@@ -127,7 +105,6 @@ function HomePage() {
       setEditingProject(null);
       fetchProjects();
     } catch (error: any) {
-      console.error('Error submitting project:', error);
       setToast(`Error: ${error.message}`);
     }
   }
@@ -143,19 +120,22 @@ function HomePage() {
       setToast(`Project ${project.status === 'started' ? 'paused' : 'started'}!`);
       fetchProjects();
     } catch (error: any) {
-      console.error('Error toggling project:', error);
       setToast(`Error: ${error.message}`);
     }
   }
 
-  const handleAddCategory = (category: any) => {
+  // Fixed the type for the category parameter
+  const handleAddCategory = (category: CategoryDisplay) => {
     setCustomCategories([...customCategories, category]);
   };
 
-  const handleSelectCategory = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    setSelectedTag(null);
-  };
+  // Extract unique categories from projects
+  const projectCategories = new Set<string>();
+  projects.forEach(project => {
+    if (project.categories) {
+      projectCategories.add(project.categories);
+    }
+  });
 
   const filteredProjects = projects.filter(project => {
     // Filter by category
@@ -185,14 +165,6 @@ function HomePage() {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
-  const tagCounts = projects.length > 0 ? projects.reduce((acc, project) => {
-    project.tags.split(',').forEach(tag => {
-      const trimmedTag = tag.trim();
-      acc[trimmedTag] = (acc[trimmedTag] || 0) + 1;
-    });
-    return acc;
-  }, {} as { [tag: string]: number }) : {};
-
   const handleCreateNew = () => {
     setEditingProject(null);
     setIsFormOpen(true);
@@ -205,20 +177,80 @@ function HomePage() {
       <Header 
         user={user} 
         onCreateNew={handleCreateNew}
+        showArchive={showArchive}
+        onToggleArchive={() => setShowArchive(!showArchive)}
       />
       
       <div className="flex-1">
         <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 w-full">
           <div className="mb-3 md:mb-4">
-            <CategoryManager
-              categories={customCategories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={handleSelectCategory}
-              onAddCategory={handleAddCategory}
-              className="mt-2"
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
+                  selectedCategory === 'all'
+                    ? "bg-github-green text-white border-github-green" 
+                    : "bg-github-card text-github-text border-github-border hover:border-github-green"
+                )}
+              >
+                All Projects
+              </button>
+              
+              {/* Only render categories that users have created */}
+              {customCategories.length > 0 && customCategories.map(category => {
+                // Only show categories that are actually used in projects
+                if (!projectCategories.has(category.id)) return null;
+                
+                // Get the dynamic icon component safely
+                let IconComponent = HelpCircle; // Default fallback icon
+                if (category.icon && typeof category.icon === 'string') {
+                  // @ts-ignore - We're safely handling the case where the icon doesn't exist
+                  IconComponent = LucideIcons[category.icon] || HelpCircle;
+                }
+                
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
+                      selectedCategory === category.id
+                        ? "bg-github-card border-2 border-github-green text-white" 
+                        : "bg-github-card text-github-text border-github-border hover:border-github-green"
+                    )}
+                  >
+                    <IconComponent 
+                      size={14} 
+                      color={selectedCategory === category.id ? category.color : undefined}
+                      className={selectedCategory !== category.id ? "text-github-text" : undefined}
+                    />
+                    <span>{category.label}</span>
+                  </button>
+                );
+              })}
+              
+              {/* Show uncategorized projects button if there are any */}
+              {projects.some(p => !p.categories) && (
+                <button
+                  onClick={() => setSelectedCategory('uncategorized')}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
+                    selectedCategory === 'uncategorized'
+                      ? "bg-github-card border-2 border-github-green text-white" 
+                      : "bg-github-card text-github-text border-github-border hover:border-github-green"
+                  )}
+                >
+                  <HelpCircle 
+                    size={14} 
+                    className={selectedCategory !== 'uncategorized' ? "text-github-text" : undefined}
+                  />
+                  <span>Uncategorized</span>
+                </button>
+              )}
+            </div>
 
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-3 md:mt-4">
               {selectedTag && (
                 <span className="px-2 py-1 bg-github-card text-github-text rounded-full text-xs border border-github-border flex items-center gap-1">
                   {selectedTag}
@@ -230,24 +262,36 @@ function HomePage() {
                   </button> 
                 </span>
               )}
-              
-              <button
-                onClick={() => setShowArchive(!showArchive)}
-                className={cn(
-                  "ml-auto flex items-center gap-1 px-2 py-1 rounded-md text-xs border transition-colors",
-                  showArchive 
-                    ? "bg-github-green text-white border-github-green" 
-                    : "bg-github-card text-github-text border-github-border"
-                )}
-              >
-                <Archive size={12} />
-                <span>Show Archive</span>
-              </button>
             </div>
           </div>
 
           {loading ? (
             <div className="text-left text-github-text">Loading projects...</div>
+          ) : projects.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-github-text mb-4">No projects yet</div>
+              <button
+                onClick={handleCreateNew}
+                className="px-4 py-2 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors"
+              >
+                Create Your First Project
+              </button>
+            </div>
+          ) : filteredProjects.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-github-text mb-4">
+                No projects match your current filters
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedCategory('all');
+                  setSelectedTag(null);
+                }}
+                className="px-4 py-2 bg-github-card border border-github-border text-github-text hover:text-white rounded-md transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
           ) : (
             <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               <AnimatePresence>
