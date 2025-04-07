@@ -5,19 +5,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import { Select } from './Select';
 import { supabase } from '../lib/supabase';
+import { CategoryManager } from './CategoryManager';
 
 interface ProjectFormProps {
   project?: Project;
   onSubmit: (data: Partial<Project>) => void;
   onClose: () => void;
-  categories: { id: ProjectCategory | 'all'; label: string; icon: React.ReactNode }[];
+  customCategories: any[];
+  onAddCategory: (category: any) => void;
 }
 
-export function ProjectForm({ project, onSubmit, onClose, categories }: ProjectFormProps) {
+export function ProjectForm({ 
+  project, 
+  onSubmit, 
+  onClose, 
+  customCategories,
+  onAddCategory 
+}: ProjectFormProps) {
   const [formData, setFormData] = useState({
     name: project?.name || '',
     description: project?.description || '',
-    categories: project?.categories || ('miscellaneous' as ProjectCategory),
+    categories: project?.categories || 'miscellaneous',
     link: project?.link || '',
     status: project?.status || ('concept' as ProjectStatus),
     tags: project?.tags || '',
@@ -160,6 +168,13 @@ export function ProjectForm({ project, onSubmit, onClose, categories }: ProjectF
     }, 100);
   };
 
+  // Handle category selection
+  const handleSelectCategory = (categoryId: string) => {
+    if (categoryId !== 'all') {
+      setFormData(prev => ({ ...prev, categories: categoryId }));
+    }
+  };
+
   return (
     <motion.div
       className="bg-github-card rounded-lg w-full max-w-2xl relative border border-github-border p-3 md:p-6"
@@ -178,41 +193,15 @@ export function ProjectForm({ project, onSubmit, onClose, categories }: ProjectF
       <form onSubmit={handleSubmit} className="space-y-2 md:space-y-3">
         {formError && <div className="text-red-500 mb-2 md:mb-4">{formError}</div>}
 
-        <div className="mb-2 md:mb-3" ref={categoryRef}>
-          <div className="relative overflow-x-auto pb-2">
-            <motion.div
-              className="absolute top-0 left-0 h-full bg-github-green rounded-md transition-all duration-300"
-              style={{
-                left: (categoryRef.current?.querySelector(`[data-category="${formData.categories}"]`) as HTMLElement)?.offsetLeft ?? 0,
-                width: (categoryRef.current?.querySelector(`[data-category="${formData.categories}"]`) as HTMLElement)?.offsetWidth ?? 0,
-                height: (categoryRef.current?.querySelector(`[data-category="${formData.categories}"]`) as HTMLElement)?.offsetHeight ?? 0,
-              }}
-              layout
-            />
-            <div className="flex gap-1 md:gap-2">
-              {categories.map(category => (
-                <button
-                  key={category.id}
-                  type="button"
-                  onClick={() => {
-                    if (category.id !== 'all') {
-                      setFormData(prev => ({ ...prev, categories: category.id as ProjectCategory }));
-                    }
-                  }}
-                  className={cn(
-                    "relative flex items-center gap-1 px-2 py-1 rounded-md transition-colors text-xs md:text-sm z-10",
-                    formData.categories === category.id
-                      ? "bg-github-green text-white"
-                      : "bg-github-card text-github-text border border-github-border hover:border-github-green"
-                  )}
-                  data-category={category.id}
-                >
-                  {category.icon}
-                  <span className="hidden md:inline">{category.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* Replace category buttons with CategoryManager */}
+        <div className="mb-2 md:mb-3">
+          <label className="block text-sm font-medium mb-1 text-github-text">Category</label>
+          <CategoryManager
+            categories={customCategories}
+            selectedCategory={formData.categories}
+            onSelectCategory={handleSelectCategory}
+            onAddCategory={onAddCategory}
+          />
         </div>
 
         <div className="flex flex-col md:flex-row items-start gap-2 md:gap-4">

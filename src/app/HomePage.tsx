@@ -1,35 +1,31 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   PlusCircle,
-  List,
-  BrainCircuit as Brain,
-  LineChart,
-  Cpu,
-  Puzzle,
-  User
+  User,
+  X,
+  Archive
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ProjectCard } from '../components/ProjectCard';
 import { ProjectForm } from '../components/ProjectForm';
-import { ProjectFilters } from '../components/ProjectFilters';
-import type { Project, ProjectCategory } from '../types';
+import { CategoryManager } from '../components/CategoryManager';
+import type { Project } from '../types';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Footer } from '../components/Footer';
 import { ProfileDropdown } from '../components/ProfileDropdown';
 
-const categories: { id: ProjectCategory | 'all'; label: string; icon: React.ReactNode }[] = [
-  { id: 'all', label: 'On-going', icon: <List className="w-4 h-4 md:w-5 md:h-5" /> },
-  { id: 'research', label: 'Research', icon: <Brain className="w-4 h-4 md:w-5 md:h-5" /> },
-  { id: 'analysis', label: 'Analysis', icon: <LineChart className="w-4 h-4 md:w-5 md:h-5" /> },
-  { id: 'engineering', label: 'Engineering', icon: <Cpu className="w-4 h-4 md:w-5 md:h-5" /> },
-  { id: 'miscellaneous', label: 'Miscellaneous', icon: <Puzzle className="w-4 h-4 md:w-5 md:h-5" /> },
+const DEFAULT_CATEGORIES = [
+  { id: 'research', label: 'Research', icon: 'BrainCircuit', color: '#6366f1' },
+  { id: 'analysis', label: 'Analysis', icon: 'LineChart', color: '#10b981' },
+  { id: 'engineering', label: 'Engineering', icon: 'Cpu', color: '#0ea5e9' },
+  { id: 'miscellaneous', label: 'Miscellaneous', icon: 'Puzzle', color: '#64748b' },
 ];
 
 function HomePage() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<ProjectCategory | 'all'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -43,6 +39,11 @@ function HomePage() {
   const navigate = useNavigate();
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isBlurBackground, setIsBlurBackground] = useState(false);
+  const [customCategories, setCustomCategories] = useState(() => {
+    // Try to load from localStorage first
+    const saved = localStorage.getItem('projectCategories');
+    return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
+  });
 
   useEffect(() => {
     setIsBlurBackground(isFormOpen || isProfileDropdownOpen);
@@ -70,6 +71,10 @@ function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('projectCategories', JSON.stringify(customCategories));
+  }, [customCategories]);
+
   async function fetchProjects(currentUser = user) {
     if (!currentUser) return;
     
@@ -94,10 +99,14 @@ function HomePage() {
     setLoading(false);
   }
 
-  async function handleProjectSubmit(projectData: Partial<Project>) {
-    // Implementation goes here
-    // For example:
+  async function handleProjectSubmit(data: Partial<Project>) {
     try {
+      const projectData = {
+        ...data,
+        categories: data.categories || 'miscellaneous',
+        user_id: user.id
+      };
+
       if (editingProject) {
         // Update existing project
         const { error } = await supabase
@@ -111,7 +120,7 @@ function HomePage() {
         // Create new project
         const { error } = await supabase
           .from('projects')
-          .insert([{ ...projectData, user_id: user.id }]);
+          .insert([projectData]);
           
         if (error) throw error;
         setToast('Project created successfully!');
@@ -127,7 +136,6 @@ function HomePage() {
   }
 
   async function handleToggleStarted(project: Project) {
-    // Implementation goes here
     try {
       const { error } = await supabase
         .from('projects')
@@ -142,6 +150,15 @@ function HomePage() {
       setToast(`Error: ${error.message}`);
     }
   }
+
+  const handleAddCategory = (category: any) => {
+    setCustomCategories([...customCategories, category]);
+  };
+
+  const handleSelectCategory = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setSelectedTag(null);
+  };
 
   const filteredProjects = projects.filter(project => {
     // Filter by category
@@ -218,21 +235,40 @@ function HomePage() {
               )}
             </div>
           </div>
-          <ProjectFilters
-            categories={categories}
+          <CategoryManager
+            categories={customCategories}
             selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            selectedTag={selectedTag}
-            setSelectedTag={setSelectedTag}
-            showArchive={showArchive}
-            setShowArchive={setShowArchive}
-            isFilterOpen={isFilterOpen}
-            setIsFilterOpen={setIsFilterOpen}
-            tagCounts={tagCounts}
-            setKey={setKey}
-            categoryRef={categoryRef}
-            className="mt-2 md:mt-4 px-0 md:px-0"
+            onSelectCategory={handleSelectCategory}
+            onAddCategory={handleAddCategory}
+            className="mt-2"
           />
+
+          <div className="flex items-center gap-2 mt-2">
+            {selectedTag && (
+              <span className="px-2 py-1 bg-github-card text-github-text rounded-full text-xs border border-github-border flex items-center gap-1">
+                {selectedTag}
+                <button
+                  onClick={() => setSelectedTag(null)}
+                  className="ml-1 text-github-text hover:text-white"
+                >
+                  <X size={12} />
+                </button> 
+              </span>
+            )}
+            
+            <button
+              onClick={() => setShowArchive(!showArchive)}
+              className={cn(
+                "ml-auto flex items-center gap-1 px-2 py-1 rounded-md text-xs border transition-colors",
+                showArchive 
+                  ? "bg-github-green text-white border-github-green" 
+                  : "bg-github-card text-github-text border-github-border"
+              )}
+            >
+              <Archive size={12} />
+              <span>Show Archive</span>
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -276,13 +312,14 @@ function HomePage() {
               transition={{ duration: 0.2 }}
             >
               <ProjectForm
-                categories={categories.filter(c => c.id !== 'all')}
+                customCategories={customCategories}
                 project={editingProject || undefined}
                 onSubmit={handleProjectSubmit}
                 onClose={() => {
                   setIsFormOpen(false);
                   setEditingProject(null);
                 }}
+                onAddCategory={handleAddCategory}
               />
             </motion.div>
           )}

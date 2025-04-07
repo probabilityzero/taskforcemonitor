@@ -95,13 +95,3 @@ select {
   border: 1px solid #30363d;
   pointer-events: none;
 }
-
-.backdrop-blur-sm {
-    backdrop-filter: blur(20px); /* Stronger blur for form background */
-    background-color: rgba(0,0,0,0.7); /* Increased opacity for form background */
-}
-
-.backdrop-blur-md {
-    backdrop-filter: blur(20px); /* Stronger blur for dropdown background */
-    background-color: rgba(0,0,0,0.7); /* Increased opacity for dropdown background */
-}
