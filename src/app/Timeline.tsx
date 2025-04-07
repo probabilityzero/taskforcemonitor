@@ -78,16 +78,15 @@ function formatDateTime(date: Date): string {
 }
 
 function Timeline() {
-  const { user, setIsFormOpen: setGlobalFormOpen } = useContext(AppContext);
+  // Access the full context once at component level
+  const { user, setIsFormOpen: setGlobalFormOpen, setRefreshProjects } = useContext(AppContext);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string | null>(null);
-  // Removing unused variable isFormOpen
   
-  // Add useEffect for refresh function if needed
+  // Use the context values safely in useEffect
   useEffect(() => {
-    const { setRefreshProjects } = useContext(AppContext);
-    
+    // Now using setRefreshProjects from the component scope
     if (setRefreshProjects) {
       setRefreshProjects(() => fetchTimeline);
     }
@@ -97,7 +96,7 @@ function Timeline() {
         setRefreshProjects(undefined);
       }
     };
-  }, []);
+  }, [setRefreshProjects]); // Add setRefreshProjects to the dependency array
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
