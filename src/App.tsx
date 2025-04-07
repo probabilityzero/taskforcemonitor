@@ -8,6 +8,7 @@ import HomePage from './app/HomePage';
 import WelcomePage from './app/WelcomePage';
 import Timeline from './app/Timeline';
 import Repositories from './app/Repositories';
+import ProjectDetailPage from './app/ProjectDetailPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Header } from './components/Header';
 import { supabase } from './lib/supabase';
@@ -106,6 +107,7 @@ function AppWrapper() {
               <Route path="/timeline" element={<Timeline />} />
               <Route path="/repositories" element={<Repositories />} />
               <Route path="/account-settings" element={<AccountSettings />} />
+              <Route path="/project/:projectId" element={<ProjectDetailPage />} />
             </Route>
           </Route>
           

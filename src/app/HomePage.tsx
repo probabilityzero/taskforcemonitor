@@ -328,11 +328,15 @@ function HomePage() {
                       setIsFormOpen(true);
                     }}
                     setToast={setToast}
+                    onUpdate={() => fetchProjects()}
                     onStatusChange={async (project, newStatus) => {
                       try {
                         const { error } = await supabase
                           .from('projects')
-                          .update({ status: newStatus })
+                          .update({ 
+                            status: newStatus,
+                            updated_at: new Date().toISOString()
+                          })
                           .eq('id', project.id);
                           
                         if (error) throw error;
