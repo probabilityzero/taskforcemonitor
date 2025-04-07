@@ -11,7 +11,6 @@ import {
   Code, 
   Calendar, 
   Plus, 
-  RefreshCw,
   ExternalLink,
   ArrowRight,
   CheckCircle2
@@ -263,24 +262,6 @@ function Repositories() {
 
   return (
     <div className="min-h-screen bg-github-bg flex flex-col">
-      <div className="flex-1">
-        <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-white">Repositories</h1>
-            
-            <button
-              onClick={() => setAppFormOpen(true)}
-              className="flex items-center gap-1 px-3 py-1.5 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Project</span>
-            </button>
-          </div>
-          
-          {/* Rest of your repositories component */}
-        </div>
-      </div>
-
       {isFormOpen && selectedRepo && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-github-card border border-github-border rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>

@@ -122,3 +122,26 @@ select {
     width: 177.78vh;
   }
 }
+
+
+/* Add this to your global CSS file */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(40, 44, 52, 0.1) 25%, 
+    rgba(60, 64, 72, 0.24) 37%, 
+    rgba(40, 44, 52, 0.1) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, PlayCircle, CheckCircle, Flag, Lightbulb, Calendar, Link as LinkIcon, MessageSquare, Tag } from 'lucide-react';
+import { X, PlayCircle, CheckCircle, Flag, Lightbulb, Calendar, MessageSquare } from 'lucide-react';
 import type { Project, ProjectStatus, ProjectPriority } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Select } from './Select';

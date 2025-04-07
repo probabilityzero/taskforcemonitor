@@ -6,6 +6,7 @@ import type { Project } from '../types';
 import ProjectDetail from '../components/ProjectDetail';
 import { ProjectForm } from '../components/ProjectForm';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ProjectDetailSkeleton } from '../components/Skeleton';
 
 function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -125,8 +126,8 @@ function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-github-text">Loading project...</div>
+      <div className="flex-1 max-w-4xl mx-auto py-6 px-4">
+        <ProjectDetailSkeleton />
       </div>
     );
   }

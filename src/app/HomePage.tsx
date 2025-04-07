@@ -8,6 +8,7 @@ import type { Project, CategoryDisplay } from '../types';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
+import { CardSkeleton, Skeleton } from '../components/Skeleton';
 
 function HomePage() {
   const { user, setIsFormOpen: setGlobalFormOpen, setRefreshProjects } = useContext(AppContext);
@@ -296,7 +297,30 @@ function HomePage() {
         </div>
 
         {loading ? (
-          <div className="text-left text-github-text">Loading projects...</div>
+          <div>
+            <div className="mb-4">
+              {/* Categories skeleton */}
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <Skeleton width={100} height={32} rounded="rounded-md" />
+                <Skeleton width={120} height={32} rounded="rounded-md" />
+                <Skeleton width={110} height={32} rounded="rounded-md" />
+                <Skeleton width={90} height={32} rounded="rounded-md" />
+              </div>
+              
+              <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <motion.div
+                    key={`skeleton-${index}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                  >
+                    <CardSkeleton />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+          </div>
         ) : projects.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-github-text mb-4">No projects yet</div>

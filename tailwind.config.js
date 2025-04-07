@@ -41,6 +41,7 @@ export default {
         'google-auth-gradient': 'google-gradient 8s linear infinite alternate',
         'github-auth-gradient': 'github-gradient 8s linear infinite alternate',
         'linkedin-auth-gradient': 'linkedin-gradient 8s linear infinite alternate',
+        'shimmer': 'shimmer 1.5s infinite',
       },
       keyframes: {
         'google-gradient': {
@@ -66,6 +67,10 @@ export default {
           '100%': {
             backgroundPosition: '100% 50%',
           },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
         },
       },
     },

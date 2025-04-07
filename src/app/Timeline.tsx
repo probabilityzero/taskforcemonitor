@@ -17,6 +17,7 @@ import { cn } from '../lib/utils';
 import { AppContext } from '../App';
 import { parseProjectNotes } from '../lib/projectUtils';
 import { Project, NoteEntry } from '../types';
+import { Skeleton, TimelineEventSkeleton } from '../components/Skeleton';
 
 interface TimelineEvent {
   id: string;
@@ -327,39 +328,69 @@ function Timeline() {
           </button>
         </div>
         
-        {/* Filter buttons */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <button
-            onClick={() => setFilter(null)}
-            className={cn(
-              "px-3 py-1 text-xs rounded-full border transition-colors",
-              !filter 
-                ? "bg-github-tag text-white border-github-tag" 
-                : "bg-transparent text-github-text border-github-border hover:border-github-border-hover"
-            )}
-          >
-            All
-          </button>
-          
-          {['create', 'note', 'link', 'start', 'complete', 'abandon'].map(type => (
+        {/* Only show the real filter buttons when not loading */}
+        {!loading && (
+          <div className="flex flex-wrap gap-2 mb-6">
             <button
-              key={type}
-              onClick={() => setFilter(type)}
+              onClick={() => setFilter(null)}
               className={cn(
-                "px-3 py-1 text-xs rounded-full border transition-colors flex items-center gap-1",
-                filter === type 
+                "px-3 py-1 text-xs rounded-full border transition-colors",
+                !filter 
                   ? "bg-github-tag text-white border-github-tag" 
                   : "bg-transparent text-github-text border-github-border hover:border-github-border-hover"
               )}
             >
-              {getEventIcon(type)}
-              <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+              All
             </button>
-          ))}
-        </div>
+            
+            {['create', 'note', 'link', 'start', 'complete', 'abandon'].map(type => (
+              <button
+                key={type}
+                onClick={() => setFilter(type)}
+                className={cn(
+                  "px-3 py-1 text-xs rounded-full border transition-colors flex items-center gap-1",
+                  filter === type 
+                    ? "bg-github-tag text-white border-github-tag" 
+                    : "bg-transparent text-github-text border-github-border hover:border-github-border-hover"
+                )}
+              >
+                {getEventIcon(type)}
+                <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+              </button>
+            ))}
+          </div>
+        )}
         
         {loading ? (
-          <div className="text-github-text">Loading timeline...</div>
+          <div>
+            {/* Skeleton for filter buttons */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              <Skeleton width={60} height={26} rounded="rounded-full" />
+              <Skeleton width={80} height={26} rounded="rounded-full" />
+              <Skeleton width={70} height={26} rounded="rounded-full" />
+              <Skeleton width={90} height={26} rounded="rounded-full" />
+              <Skeleton width={85} height={26} rounded="rounded-full" />
+            </div>
+            
+            <div className="relative">
+              {/* Timeline line */}
+              <div className="absolute left-6 top-0 bottom-0 w-px bg-github-border"></div>
+              
+              {/* Skeleton events with shimmer effect */}
+              <div className="space-y-6">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <motion.div
+                    key={`skeleton-${index}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                  >
+                    <TimelineEventSkeleton />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
         ) : events.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-github-text mb-4">No activity yet</div>

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Clock,
   Star, 
   StarHalf,
   ChevronRight,

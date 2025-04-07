@@ -8,8 +8,6 @@ import {
   ChevronDown,
   Book,
   Settings,
-  Home,
-  Archive,
   History,
   LayoutDashboard,
   GitBranch
