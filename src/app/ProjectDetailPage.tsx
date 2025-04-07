@@ -108,6 +108,21 @@ function ProjectDetailPage() {
     }
   };
 
+  // Prevent body scroll when modal is active
+  useEffect(() => {
+    // Prevent scrolling on the background when modal is open
+    if (isEditModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      // Cleanup - ensure scrolling is restored
+      document.body.style.overflow = '';
+    };
+  }, [isEditModalOpen]);
+
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -141,7 +156,9 @@ function ProjectDetailPage() {
       />
 
       {/* Edit Modal */}
-      <AnimatePresence>
+      <AnimatePresence onExitComplete={() => {
+        document.body.style.overflow = '';
+      }}>
         {isEditModalOpen && (
           <motion.div
             key="project-form"

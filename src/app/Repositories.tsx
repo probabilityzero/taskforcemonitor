@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { supabase } from '../lib/supabase';
 import { ProjectForm } from '../components/ProjectForm';
 import { motion } from 'framer-motion';
@@ -17,6 +17,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import type { Project, ProjectStatus } from '../types';
+import { AppContext } from '../App';
 
 interface Repository {
   id: string;
@@ -81,6 +82,7 @@ function Repositories() {
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [customCategories, setCustomCategories] = useState<Category[]>([]);
+  const { setIsFormOpen: setAppFormOpen } = useContext(AppContext);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -261,8 +263,24 @@ function Repositories() {
 
   return (
     <div className="min-h-screen bg-github-bg flex flex-col">
+      <div className="flex-1">
+        <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-white">Repositories</h1>
+            
+            <button
+              onClick={() => setAppFormOpen(true)}
+              className="flex items-center gap-1 px-3 py-1.5 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>New Project</span>
+            </button>
+          </div>
+          
+          {/* Rest of your repositories component */}
+        </div>
+      </div>
 
-      
       {isFormOpen && selectedRepo && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-github-card border border-github-border rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -282,38 +300,6 @@ function Repositories() {
         <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-6 w-full">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <h1 className="text-2xl font-bold text-white">Repositories</h1>
-            
-            <form onSubmit={handleSearch} className="flex flex-wrap gap-2 w-full md:w-auto">
-              <select
-                value={service}
-                onChange={(e) => setService(e.target.value as 'github' | 'gitlab')}
-                className="bg-github-fg border border-github-border rounded-md text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-github-green"
-              >
-                <option value="github">GitHub</option>
-                <option value="gitlab">GitLab</option>
-              </select>
-              
-              <div className="flex flex-1 min-w-[200px]">
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder={`${service} username`}
-                  className="flex-1 bg-github-fg border border-github-border rounded-l-md text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-github-green"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-github-green hover:bg-github-green-hover text-white px-4 py-2 rounded-r-md transition-colors flex items-center"
-                >
-                  {loading ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Search className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-            </form>
           </div>
           
           {error && (

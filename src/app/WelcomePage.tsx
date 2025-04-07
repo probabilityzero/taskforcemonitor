@@ -227,7 +227,7 @@ export default function WelcomePage() {
       <main className="relative z-[1]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
           {/* Updated hero layout */}
-          <div className="w-full lg:w-2/3 ml-auto">
+          <div className="w-full lg:w-2/3 mr-auto">
             {/* Hero content */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -250,7 +250,7 @@ export default function WelcomePage() {
                       setAuthMode('signup');
                       setShowAuthForm(true);
                     }}
-                    className="flex items-center gap-2 px-6 py-3 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-lg"
+                    className="flex items-center gap-2 px-6 py-3 bg-github-green hover:bg-github-green-hover text-white rounded-lg transition-colors text-lg"
                   >
                     Get Started <ArrowRight />
                   </button>
@@ -371,7 +371,7 @@ export default function WelcomePage() {
                     setAuthMode('signup');
                     setShowAuthForm(true);
                   }}
-                  className="flex items-center gap-2 px-8 py-4 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-lg"
+                  className="flex items-center gap-2 px-8 py-4 bg-github-green hover:bg-github-green-hover text-white rounded-lg transition-colors text-lg"
                 >
                   Get Started <ChevronRight />
                 </button>

@@ -10,11 +10,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
 
 function HomePage() {
-  const { user, setCreateNewProject } = useContext(AppContext);
+  const { user, setIsFormOpen: setGlobalFormOpen, setRefreshProjects } = useContext(AppContext);
+  // Add a local form state
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
@@ -27,21 +28,20 @@ function HomePage() {
   });
 
   useEffect(() => {
-    // Register the create new project callback with the app context
-    if (setCreateNewProject) {
-      setCreateNewProject(() => handleCreateNew);
-    }
-    
-    return () => {
-      // Clear the callback when component unmounts
-      if (setCreateNewProject) {
-        setCreateNewProject(undefined);
-      }
-    };
-  }, [setCreateNewProject]);
-
-  useEffect(() => {
+    // Only apply blur when the form is open
     setIsBlurBackground(isFormOpen);
+    
+    // This is important - when modal closes, we need to make sure the backdrop is fully removed
+    if (!isFormOpen) {
+      // Small delay to ensure animations complete before removing backdrop effects
+      const timer = setTimeout(() => {
+        document.body.style.overflow = '';
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      // Prevent scrolling when modal is open
+      document.body.style.overflow = 'hidden';
+    }
   }, [isFormOpen]);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ function HomePage() {
     localStorage.setItem('projectCategories', JSON.stringify(customCategories));
   }, [customCategories]);
 
-  async function fetchProjects(currentUser = user) {
+  const fetchProjects = async (currentUser = user) => {
     if (!currentUser) return;
     
     setLoading(true);
@@ -73,7 +73,23 @@ function HomePage() {
 
     setProjects(data || []);
     setLoading(false);
-  }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+    
+    // Register the refresh callback
+    if (setRefreshProjects) {
+      setRefreshProjects(fetchProjects);
+    }
+    
+    return () => {
+      // Cleanup when component unmounts
+      if (setRefreshProjects) {
+        setRefreshProjects(undefined);
+      }
+    };
+  }, [setRefreshProjects]);
 
   async function handleProjectSubmit(data: Partial<Project>) {
     try {
@@ -103,21 +119,6 @@ function HomePage() {
       
       setIsFormOpen(false);
       setEditingProject(null);
-      fetchProjects();
-    } catch (error: any) {
-      setToast(`Error: ${error.message}`);
-    }
-  }
-
-  async function handleToggleStarted(project: Project) {
-    try {
-      const { error } = await supabase
-        .from('projects')
-        .update({ status: project.status === 'started' ? 'concept' : 'started' })
-        .eq('id', project.id);
-        
-      if (error) throw error;
-      setToast(`Project ${project.status === 'started' ? 'paused' : 'started'}!`);
       fetchProjects();
     } catch (error: any) {
       setToast(`Error: ${error.message}`);
@@ -169,15 +170,26 @@ function HomePage() {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
+  // Update the handler to set both local and global state
   const handleCreateNew = () => {
-    setEditingProject(null);
     setIsFormOpen(true);
+    setGlobalFormOpen(true);
   };
 
-  // Function to handle tag clicks for filtering
-  const handleTagClick = (tag: string) => {
-    setSelectedTag(tag);
+  // Add a handler for closing that updates both states
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setGlobalFormOpen(false);
+    setEditingProject(null);
   };
+  
+  // Make sure the global state is synced with local state
+  useEffect(() => {
+    // This effect allows us to handle external form state changes
+    return () => {
+      setGlobalFormOpen(false);
+    };
+  }, [setGlobalFormOpen]);
 
   return (
     <div className={cn("flex-1", isBlurBackground ? "overflow-hidden" : "")}>
@@ -362,7 +374,11 @@ function HomePage() {
       </div>
 
       {/* Project Form Modal */}
-      <AnimatePresence>
+      <AnimatePresence onExitComplete={() => {
+        // This ensures cleanup after animation completes
+        document.body.style.overflow = '';
+        setIsBlurBackground(false);
+      }}>
         {isFormOpen && (
           <motion.div
             key="project-form"
@@ -371,17 +387,22 @@ function HomePage() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
+            onClick={(e) => {
+              // Close when clicking on the backdrop (not on the form itself)
+              if (e.target === e.currentTarget) {
+                handleCloseForm();
+              }
+            }}
           >
-            <ProjectForm
-              customCategories={customCategories}
-              project={editingProject || undefined}
-              onSubmit={handleProjectSubmit}
-              onClose={() => {
-                setIsFormOpen(false);
-                setEditingProject(null);
-              }}
-              onAddCategory={handleAddCategory}
-            />
+            <div onClick={(e) => e.stopPropagation()}>
+              <ProjectForm
+                customCategories={customCategories}
+                project={editingProject || undefined}
+                onSubmit={handleProjectSubmit}
+                onClose={handleCloseForm}
+                onAddCategory={handleAddCategory}
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

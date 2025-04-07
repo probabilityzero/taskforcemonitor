@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { 
   PlusCircle, 
   User, 
@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 import { ProfileDropdown } from './ProfileDropdown';
+import { AppContext } from '../App';
 
 interface HeaderProps {
   user: any;
@@ -43,6 +44,7 @@ export function Header({
   const navigate = useNavigate();
   const location = useLocation();
   const navItemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const { setIsFormOpen } = useContext(AppContext);
   
   // Define navigation items
   const navItems = [
@@ -107,6 +109,15 @@ export function Header({
     e.stopPropagation();
   };
 
+  const handleCreateNew = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onCreateNew) {
+      onCreateNew();
+    } else {
+      setIsFormOpen(true);
+    }
+  };
+
   return (
     <header className="bg-github-header border-b border-github-border sticky top-0 z-40">
       {/* Top row - Logo, New button, and Profile */}
@@ -143,10 +154,7 @@ export function Header({
           <div className="flex items-center gap-2 ml-2 md:ml-0">
             {user && !minimal && (
               <button
-                onClick={(e) => {
-                  stopPropagation(e);
-                  if (onCreateNew) onCreateNew();
-                }}
+                onClick={handleCreateNew}
                 className="hidden md:flex items-center gap-1 px-2 py-1 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
               >
                 <PlusCircle className="w-4 h-4" />
@@ -303,8 +311,8 @@ export function Header({
                   ))}
                   
                   <button
-                    onClick={() => {
-                      if (onCreateNew) onCreateNew();
+                    onClick={(e) => {
+                      handleCreateNew(e);
                       setIsMenuOpen(false);
                     }}
                     className="w-full text-left px-3 py-2 rounded-md text-base text-github-text hover:text-white transition-colors"

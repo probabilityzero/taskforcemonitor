@@ -310,7 +310,6 @@ export function ProjectForm({
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-sm font-medium text-github-text">Topics</label>
-                <Tag size={14} className="text-github-text" />
               </div>
               <div className="relative">
                 <input
@@ -318,7 +317,7 @@ export function ProjectForm({
                   value={tagInput}
                   onChange={handleTagInputChange}
                   onKeyDown={handleTagInputKeyDown}
-                  placeholder="Add topics (press space to add)"
+                  placeholder="press space to add tag"
                   className="w-full p-2 rounded-md border focus:border-github-border-light bg-github-input text-github-text placeholder:text-github-text/50 text-sm"
                   ref={tagInputRef}
                   onBlur={handleBlur}
@@ -360,18 +359,16 @@ export function ProjectForm({
             {/* Repository Link */}
             <div className="flex items-center gap-2 mb-4 mt-2">
               <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center mb-1">
                   <label className="block text-sm font-medium text-github-text" htmlFor="link">
-                    Repository Link
+                    Link to Project
                   </label>
-                  <LinkIcon size={14} className="text-github-text" />
                 </div>
                 <input
                   id="link"
                   type="url"
                   value={link}
                   onChange={(e) => setLink(e.target.value)}
-                  placeholder="https://github.com/username/repository"
                   className="w-full p-2 bg-github-input border border-github-border rounded-md text-white text-sm focus:outline-none focus:ring-1 focus:ring-github-green"
                 />
               </div>
@@ -412,7 +409,6 @@ export function ProjectForm({
               <textarea
                 value={formData.comments}
                 onChange={(e) => setFormData(prev => ({ ...prev, comments: e.target.value }))}
-                placeholder="Add private notes about this project..."
                 className="w-full p-2 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm h-32"
                 rows={5}
               />
@@ -427,7 +423,7 @@ export function ProjectForm({
 
             {/* Delete Project Button */}
             {project && (
-              <div className="pt-4 border-t border-github-border mt-4">
+              <div className="pt-4 mt-4">
                 <button
                   type="button"
                   onClick={() => setIsDeleteModalOpen(true)}

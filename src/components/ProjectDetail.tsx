@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Clock, 
   Star, 
@@ -14,13 +14,18 @@ import {
   MessageSquare,
   Calendar,
   Link as LinkIcon,
-  ChevronRight,
   PlusCircle
 } from 'lucide-react';
 import type { Project, ProjectStatus, NoteEntry } from '../types';
 import { cn } from '../lib/utils';
-import { supabase } from '../lib/supabase';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { 
+  addProjectNote, 
+  deleteProjectNote,
+  updateProjectStatus,
+  updateProject,
+  parseProjectNotes
+} from '../lib/projectUtils';
 
 interface ProjectDetailProps {
   project: Project;
@@ -32,14 +37,15 @@ interface ProjectDetailProps {
   setToast?: (message: string) => void;
 }
 
+// Prevent closing when clicking inside the modal
 function ProjectDetail({ 
-  project, 
-  isModal = true,
+  project,
   onClose,
   onEdit,
-  onStatusChange,
   onUpdate,
-  setToast 
+  onStatusChange,
+  setToast,
+  isModal = false
 }: ProjectDetailProps) {
   const [isUpdatingNotes, setIsUpdatingNotes] = useState(false);
   const [isUpdatingLink, setIsUpdatingLink] = useState(false);
@@ -47,27 +53,9 @@ function ProjectDetail({
   const [link, setLink] = useState(project.link || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   
-  // Parse notes from project.comments or initialize empty array
-  const [notes, setNotes] = useState<NoteEntry[]>(() => {
-    if (!project.comments) return [];
-    try {
-      const parsed = JSON.parse(project.comments);
-      return Array.isArray(parsed) ? parsed : [{
-        text: project.comments,
-        date: project.created_at,
-        id: '1'
-      }];
-    } catch (e) {
-      // If not valid JSON, create a single note entry
-      return [{
-        text: project.comments,
-        date: project.created_at,
-        id: '1'
-      }];
-    }
-  });
+  // Parse notes from project.comments using the utility
+  const [notes, setNotes] = useState<NoteEntry[]>(() => parseProjectNotes(project));
 
   const getStatusIcon = (status: string, size = 14) => {
     switch (status) {
@@ -141,15 +129,7 @@ function ProjectDetail({
     if (!onStatusChange) {
       try {
         setIsSubmitting(true);
-        const { error } = await supabase
-          .from('projects')
-          .update({ 
-            status: newStatus,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', project.id);
-          
-        if (error) throw error;
+        await updateProjectStatus(project.id, newStatus);
         
         if (setToast) setToast(`Project status updated to ${getStatusLabel(newStatus)}`);
         if (onUpdate) onUpdate();
@@ -169,27 +149,18 @@ function ProjectDetail({
   const handleAddNote = async () => {
     if (newNote.trim() === '') return;
     
-    const newEntry: NoteEntry = {
-      id: Date.now().toString(),
-      text: newNote.trim(),
-      date: new Date().toISOString()
-    };
-    
-    const updatedNotes = [...notes, newEntry];
-    
     try {
       setIsSubmitting(true);
-      const { error } = await supabase
-        .from('projects')
-        .update({ 
-          comments: JSON.stringify(updatedNotes),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', project.id);
-        
-      if (error) throw error;
+      await addProjectNote(project.id, newNote.trim());
       
-      setNotes(updatedNotes);
+      // Update local state
+      const newEntry: NoteEntry = {
+        id: Date.now().toString(),
+        text: newNote.trim(),
+        date: new Date().toISOString()
+      };
+      
+      setNotes([...notes, newEntry]);
       setNewNote('');
       if (setToast) setToast('Note added');
       setIsUpdatingNotes(false);
@@ -202,21 +173,12 @@ function ProjectDetail({
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    const updatedNotes = notes.filter(note => note.id !== noteId);
-    
     try {
       setIsSubmitting(true);
-      const { error } = await supabase
-        .from('projects')
-        .update({ 
-          comments: JSON.stringify(updatedNotes),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', project.id);
-        
-      if (error) throw error;
+      await deleteProjectNote(project.id, noteId);
       
-      setNotes(updatedNotes);
+      // Update local state
+      setNotes(notes.filter(note => note.id !== noteId));
       if (setToast) setToast('Note removed');
       if (onUpdate) onUpdate();
     } catch (error: any) {
@@ -229,15 +191,7 @@ function ProjectDetail({
   const handleSaveLink = async () => {
     try {
       setIsSubmitting(true);
-      const { error } = await supabase
-        .from('projects')
-        .update({ 
-          link,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', project.id);
-        
-      if (error) throw error;
+      await updateProject(project.id, { link });
       
       if (setToast) setToast('Project link updated');
       setIsUpdatingLink(false);
@@ -264,8 +218,14 @@ function ProjectDetail({
     }
   };
 
+  // Add a function to prevent click propagation
+  const handleContentClick = (e: React.MouseEvent) => {
+    // Stop the click from reaching the backdrop
+    e.stopPropagation();
+  };
+
   const detailContent = (
-    <div className="p-4 sm:p-6 md:p-8 flex flex-col h-full">
+    <div className="p-4 sm:p-6 md:p-8 flex flex-col h-full" onClick={handleContentClick}>
       <div className="flex justify-between items-start mb-6">
         <h2 className="text-xl font-bold text-white flex-1">{project.name}</h2>
         <div className="flex items-center gap-3">
@@ -277,12 +237,14 @@ function ProjectDetail({
               <ExternalLink size={14} /> Open Full View
             </button>
           )}
-          <button 
-            className="bg-github-fg hover:bg-github-fg/80 text-white rounded-md px-3 py-1 text-sm flex items-center gap-1 transition-colors"
-            onClick={onEdit}
-          >
-            <Edit size={14} /> Edit
-          </button>
+          {onEdit && (
+            <button 
+              className="bg-github-fg hover:bg-github-fg/80 text-white rounded-md px-3 py-1 text-sm flex items-center gap-1 transition-colors"
+              onClick={onEdit}
+            >
+              <Edit size={14} /> Edit
+            </button>
+          )}
           <button 
             className="text-github-text hover:text-white transition-colors"
             onClick={handleCloseAndGoBack}
@@ -418,7 +380,6 @@ function ProjectDetail({
               type="url"
               value={link}
               onChange={(e) => setLink(e.target.value)}
-              placeholder="https://github.com/username/repository"
               className="w-full bg-github-input border border-github-border rounded-md text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-github-green"
             />
             <div className="flex justify-end gap-2 mt-1">
@@ -486,7 +447,6 @@ function ProjectDetail({
             <textarea
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
-              placeholder="Add a new note about this project..."
               className="w-full bg-github-input border border-github-border rounded-md text-white px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-github-green min-h-[80px]"
             />
             <div className="flex justify-end gap-2 mt-1">

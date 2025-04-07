@@ -1,6 +1,9 @@
 import { supabase } from './supabase';
 import type { Project, ProjectStatus, ProjectPriority, NoteEntry } from '../types';
 
+// Re-export NoteEntry so it can be imported from projectUtils
+export type { NoteEntry };
+
 /**
  * Get a project by ID
  */
@@ -56,6 +59,13 @@ export async function updateProjectStatus(projectId: string, status: ProjectStat
 }
 
 /**
+ * Update project priority
+ */
+export async function updateProjectPriority(projectId: string, priority: ProjectPriority) {
+  return updateProject(projectId, { priority });
+}
+
+/**
  * Update project notes
  * Converts notes array to JSON string for storage
  */
@@ -73,26 +83,7 @@ export async function addProjectNote(projectId: string, noteText: string): Promi
   const project = await getProject(projectId);
   
   // Parse existing notes or create empty array
-  let notes: NoteEntry[] = [];
-  if (project.comments) {
-    try {
-      notes = JSON.parse(project.comments);
-      if (!Array.isArray(notes)) {
-        notes = [{
-          id: '1',
-          text: project.comments,
-          date: project.created_at
-        }];
-      }
-    } catch (e) {
-      // If not valid JSON, create a single note entry
-      notes = [{
-        id: '1',
-        text: project.comments,
-        date: project.created_at
-      }];
-    }
-  }
+  const notes = parseProjectNotes(project);
   
   // Add new note
   const newNote: NoteEntry = {
@@ -117,33 +108,14 @@ export async function deleteProjectNote(projectId: string, noteId: string): Prom
   const project = await getProject(projectId);
   
   // Parse existing notes
-  let notes: NoteEntry[] = [];
-  if (project.comments) {
-    try {
-      notes = JSON.parse(project.comments);
-      if (!Array.isArray(notes)) {
-        notes = [{
-          id: '1',
-          text: project.comments,
-          date: project.created_at
-        }];
-      }
-    } catch (e) {
-      // If not valid JSON, create a single note entry
-      notes = [{
-        id: '1',
-        text: project.comments,
-        date: project.created_at
-      }];
-    }
-  }
+  const notes = parseProjectNotes(project);
   
   // Remove the note
-  notes = notes.filter(note => note.id !== noteId);
+  const updatedNotes = notes.filter(note => note.id !== noteId);
   
   // Update project
   return updateProject(projectId, {
-    comments: JSON.stringify(notes)
+    comments: JSON.stringify(updatedNotes)
   });
 }
 
@@ -173,4 +145,31 @@ export function parseProjectNotes(project: Project): NoteEntry[] {
       date: project.created_at
     }];
   }
+}
+
+/**
+ * Get all projects for a user
+ */
+export async function getUserProjects(userId: string) {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false });
+    
+  if (error) throw error;
+  return data as Project[];
+}
+
+/**
+ * Delete a project
+ */
+export async function deleteProject(projectId: string) {
+  const { error } = await supabase
+    .from('projects')
+    .delete()
+    .eq('id', projectId);
+    
+  if (error) throw error;
+  return true;
 }
