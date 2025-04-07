@@ -185,19 +185,19 @@ function Timeline() {
   const getEventColor = (type: string) => {
     switch (type) {
       case 'create':
-        return 'border-green-500/20 bg-green-500/10';
+        return 'border-green-500/20';
       case 'update':
-        return 'border-blue-500/20 bg-blue-500/10';
+        return 'border-blue-500/20';
       case 'start':
-        return 'border-purple-500/20 bg-purple-500/10';
+        return 'border-purple-500/20 b';
       case 'complete':
-        return 'border-green-600/20 bg-green-600/10';
+        return 'border-green-600/20 ';
       case 'abandon':
-        return 'border-yellow-500/20 bg-yellow-500/10';
+        return 'border-yellow-500/20 b';
       case 'archive':
-        return 'border-gray-500/20 bg-gray-500/10';
+        return 'border-gray-500/20';
       default:
-        return 'border-github-border bg-github-card';
+        return 'border-github-border';
     }
   };
 

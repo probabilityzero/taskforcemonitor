@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X, HelpCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { ProjectCard } from '../components/ProjectCard';
+import ProjectCard from '../components/ProjectCard';
 import { ProjectForm } from '../components/ProjectForm';
 import { Header } from '../components/Header';
 import type { Project, CategoryDisplay } from '../types';

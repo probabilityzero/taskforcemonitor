@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, PlayCircle, CheckCircle, Flag, Lightbulb } from 'lucide-react';
-import type { Project, ProjectStatus, ProjectCategory } from '../types';
+import type { Project, ProjectStatus } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '../lib/utils';
 import { Select } from './Select';
 import { supabase } from '../lib/supabase';
 import { CategoryManager } from './CategoryManager';
 
 interface ProjectFormProps {
   project?: Project;
+  initialData?: Partial<Project>;
   onSubmit: (data: Partial<Project>) => void;
   onClose: () => void;
   customCategories: any[];
@@ -17,30 +17,42 @@ interface ProjectFormProps {
 
 export function ProjectForm({ 
   project, 
+  initialData,
   onSubmit, 
   onClose, 
   customCategories,
   onAddCategory 
 }: ProjectFormProps) {
   const [formData, setFormData] = useState({
-    name: project?.name || '',
-    description: project?.description || '',
-    categories: project?.categories || 'miscellaneous',
-    link: project?.link || '',
-    status: project?.status || ('concept' as ProjectStatus),
-    tags: project?.tags || '',
-    comments: project?.comments || ''
+    name: project?.name || initialData?.name || '',
+    description: project?.description || initialData?.description || '',
+    categories: project?.categories || initialData?.categories || 'miscellaneous',
+    status: project?.status || initialData?.status || ('concept' as ProjectStatus),
+    comments: project?.comments || initialData?.comments || '',
+    priority: project?.priority || initialData?.priority || 'medium'
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState('');
-  const [tagList, setTagList] = useState<string[]>(project?.tags ? project.tags.split(',').map(tag => tag.trim()) : []);
+  const [tagList, setTagList] = useState<string[]>(() => {
+    if (project?.tags) {
+      return typeof project.tags === 'string' 
+        ? project.tags.split(',').map(tag => tag.trim()) 
+        : Array.isArray(project.tags) ? project.tags : [];
+    }
+    if (initialData?.tags) {
+      return typeof initialData.tags === 'string'
+        ? initialData.tags.split(',').map(tag => tag.trim())
+        : Array.isArray(initialData.tags) ? initialData.tags : [];
+    }
+    return [];
+  });
   const tagInputRef = useRef<HTMLInputElement>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const categoryRef = useRef<HTMLDivElement>(null);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [filteredTags, setFilteredTags] = useState<string[]>([]);
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
+  const [link, setLink] = useState(project?.link || initialData?.link || '');
 
   useEffect(() => {
     const checkMobileView = () => {
@@ -63,15 +75,24 @@ export function ProjectForm({
         return;
       }
 
-      const tags = data?.reduce((acc: string[], project: { tags: string }) => {
-        project.tags.split(',').forEach(tag => {
-          const trimmedTag = tag.trim();
-          if (trimmedTag && !acc.includes(trimmedTag)) {
-            acc.push(trimmedTag);
-          }
-        });
-        return acc;
-      }, []) || [];
+      const tags: string[] = [];
+      data?.forEach((project: { tags: string | string[] }) => {
+        if (typeof project.tags === 'string') {
+          project.tags.split(',').forEach((tag: string) => {
+            const trimmedTag = tag.trim();
+            if (trimmedTag && !tags.includes(trimmedTag)) {
+              tags.push(trimmedTag);
+            }
+          });
+        } else if (Array.isArray(project.tags)) {
+          project.tags.forEach((tag: string) => {
+            if (tag && !tags.includes(tag)) {
+              tags.push(tag);
+            }
+          });
+        }
+      });
+      
       setAllTags(tags);
       setFilteredTags(tags);
     };
@@ -120,7 +141,8 @@ export function ProjectForm({
     onSubmit({
       ...formData,
       tags: tagList.join(','),
-      status: formData.status as ProjectStatus
+      status: formData.status as ProjectStatus,
+      link
     });
   };
 
@@ -246,27 +268,6 @@ export function ProjectForm({
           />
         </div>
 
-        <AnimatePresence>
-          {(formData.status === 'completed' || formData.status === 'started') && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div>
-                <label className="block text-sm font-medium mb-1 text-github-text">Website</label>
-                <input
-                  type="url"
-                  value={formData.link}
-                  onChange={(e) => setFormData(prev => ({ ...prev, link: e.target.value }))}
-                  className="w-full p-0.5 rounded-md border focus:border-github-border-light bg-github-input text-github-text text-sm mx-1 px-2"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         <div className="mb-2 md:mb-3">
           <label className="block text-sm font-medium mb-1 text-github-text">Topics</label>
           <div className="relative">
@@ -312,6 +313,23 @@ export function ProjectForm({
               </span>
             ))}
           </div>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-github-text mb-2" htmlFor="link">
+            Repository Link
+          </label>
+          <input
+            id="link"
+            type="url"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            placeholder="https://github.com/username/repository"
+            className="w-full bg-github-fg border border-github-border rounded-md text-white px-3 py-2 focus:outline-none focus:ring-1 focus:ring-github-green"
+          />
+          <p className="text-xs text-github-text mt-1">
+            Link to the GitHub or GitLab repository
+          </p>
         </div>
 
         <div>

@@ -11,7 +11,8 @@ import {
   Home,
   Archive,
   History,
-  LayoutDashboard
+  LayoutDashboard,
+  GitBranch // Add this import
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -169,7 +170,7 @@ export function Header({
                 <Link 
                   to="/dashboard" 
                   className={cn(
-                    "px-3 py-1 text-sm transition-colors flex items-center gap-1.5 h-full relative",
+                    "px-3 py-1 transition-colors flex items-center gap-1.5 h-full relative",
                     location.pathname === '/dashboard'
                       ? "text-white font-medium"
                       : "text-github-text hover:text-white"
@@ -194,6 +195,23 @@ export function Header({
                   <History size={14} />
                   <span>Timeline</span>
                   {location.pathname === '/timeline' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500"></div>
+                  )}
+                </Link>
+                
+                {/* Add the new Repositories link */}
+                <Link 
+                  to="/repositories" 
+                  className={cn(
+                    "px-3 py-1 text-sm transition-colors flex items-center gap-1.5 h-full relative",
+                    location.pathname === '/repositories'
+                      ? "text-white font-medium"
+                      : "text-github-text hover:text-white"
+                  )}
+                >
+                  <GitBranch size={14} />
+                  <span>Repositories</span>
+                  {location.pathname === '/repositories' && (
                     <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500"></div>
                   )}
                 </Link>
@@ -282,6 +300,22 @@ export function Header({
                     <div className="flex items-center gap-2">
                       <History size={16} />
                       Timeline
+                    </div>
+                  </Link>
+                  
+                  <Link
+                    to="/repositories"
+                    className={cn(
+                      "block px-3 py-2 rounded-md text-base transition-colors",
+                      location.pathname === '/repositories'
+                        ? "text-white bg-github-active-nav font-medium"
+                        : "text-github-text hover:text-white"
+                    )}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <GitBranch size={16} />
+                      Repositories
                     </div>
                   </Link>
                   

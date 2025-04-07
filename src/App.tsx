@@ -7,6 +7,7 @@ import AccountSettings from './app/AccountSettings';
 import HomePage from './app/HomePage';
 import WelcomePage from './app/WelcomePage';
 import Timeline from './app/Timeline';
+import Repositories from './app/Repositories';
 import ProtectedRoute from './components/ProtectedRoute';
 import { supabase } from './lib/supabase';
 
@@ -62,6 +63,7 @@ function AppWrapper() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<HomePage />} />
           <Route path="/timeline" element={<Timeline />} />
+          <Route path="/repositories" element={<Repositories />} />
           <Route path="/account-settings" element={<AccountSettings />} />
         </Route>
         
