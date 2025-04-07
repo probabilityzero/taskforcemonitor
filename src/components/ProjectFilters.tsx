@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { List, BrainCircuit as Brain, Terminal, LineChart, Cpu, Archive, Puzzle, SlidersHorizontal } from 'lucide-react';
+import React from 'react';
+import { Archive, SlidersHorizontal } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ProjectCategory } from '../types';
@@ -15,7 +15,7 @@ interface ProjectFiltersProps {
     isFilterOpen: boolean;
     setIsFilterOpen: (open: boolean) => void;
     tagCounts: { [tag: string]: number };
-    setKey: (key: number) => void;
+    setKey: React.Dispatch<React.SetStateAction<number>>;
     categoryRef: React.RefObject<HTMLDivElement>;
     className?: string; // Add className prop
 }
@@ -42,9 +42,9 @@ export function ProjectFilters({
                     <motion.div
                         className="absolute top-0 left-0 h-full bg-github-green rounded-md transition-all duration-300"
                         style={{
-                            left: categoryRef.current?.querySelector(`[data-category="${selectedCategory}"]`)?.offsetLeft || 0,
-                            width: categoryRef.current?.querySelector(`[data-category="${selectedCategory}"]`)?.offsetWidth || 0,
-                            height: categoryRef.current?.querySelector(`[data-category="${selectedCategory}"]`)?.offsetHeight || 0,
+                            left: (categoryRef.current?.querySelector(`[data-category="${selectedCategory}"]`) as HTMLElement)?.offsetLeft ?? 0,
+                            width: (categoryRef.current?.querySelector(`[data-category="${selectedCategory}"]`) as HTMLElement)?.offsetWidth ?? 0,
+                            height: (categoryRef.current?.querySelector(`[data-category="${selectedCategory}"]`) as HTMLElement)?.offsetHeight ?? 0,
                         }}
                         layout
                     />
@@ -55,7 +55,7 @@ export function ProjectFilters({
                                 onClick={() => {
                                     setSelectedTag(null)
                                     setSelectedCategory(category.id)
-                                    setKey(prev => prev + 1)
+                                    setKey(prevKey => prevKey + 1)
                                 }}
                                 className={cn(
                                     "relative flex items-center gap-1 md:gap-2 px-2 py-1 rounded-md transition-colors z-10 text-sm md:text-base",

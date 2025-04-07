@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
@@ -25,20 +24,28 @@ function Auth() {
     setError(null);
     try {
       if (provider === 'google' || provider === 'linkedin') {
+        setLoading(false);
         setToast(`Login via ${provider} coming soon!`);
         return;
       } else if (provider === 'github') {
-        const redirectURL = `${window.location.origin}/#`; // Include hash in redirectURL
+        const baseUrl = window.location.origin;
+        
         const { error: signInError } = await supabase.auth.signInWithOAuth({
           provider: provider,
           options: {
-            redirectTo: redirectURL, // Use the constructed redirectURL
+            redirectTo: baseUrl, 
           },
         });
         if (signInError) {
           setError(signInError.message);
         }
       } else {
+        if (!email || !password) {
+          setError("Please enter both email and password");
+          setLoading(false);
+          return;
+        }
+        
         const { error: passwordError } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -78,7 +85,15 @@ function Auth() {
         }
       } else {
         console.log('Sign-up successful:', data);
-        navigate('/');
+        // Check if email confirmation is required
+        if (data.user && data.session) {
+          // If we have a session, user can be logged in immediately
+          navigate('/');
+        } else {
+          // User needs to confirm email
+          setToast('Please check your email to confirm your account before logging in.');
+          setShowCreateAccount(false); // Switch back to login form
+        }
       }
     } catch (err: any) {
       console.error('Sign-up exception:', err);
