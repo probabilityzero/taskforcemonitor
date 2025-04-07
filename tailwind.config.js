@@ -27,6 +27,9 @@ export default {
         'google-gradient': 'linear-gradient(90deg, #4285F4 30%, #DB4437 60%, #F4B400 80%, #0F9D58 95%)',
         'github-gradient': 'linear-gradient(90deg, #333333 30%, #6e5494 95%)',
         'linkedin-gradient': 'linear-gradient(90deg, #0077B5 95%, #0a66c2 30%)',
+        'github-header': '#161b22',
+        'github-active-nav': '#0d1117',
+        'github-avatar-bg': '#40464e',
       },
       backgroundSize: {
         'google-auth-gradient': '400% 400%',
