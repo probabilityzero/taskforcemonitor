@@ -52,35 +52,44 @@ function HomePage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial Session:', session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProjects(session.user);
+      }
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log('Auth State Change Session:', session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProjects(session.user);
+      }
     });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, []);
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-    } else {
-      fetchProjects();
-    }
-  }, [user, navigate]);
-
-  async function fetchProjects() {
+  async function fetchProjects(currentUser = user) {
+    if (!currentUser) return;
+    
     setLoading(true);
+    console.log("Fetching projects for user:", currentUser.id);
+    
     const { data, error } = await supabase
       .from('projects')
       .select('*')
-      .eq('user_id', user?.id)
+      .eq('user_id', currentUser.id)
       .order('status', { ascending: false });
 
     if (error) {
       console.error('Error fetching projects:', error);
+      setToast(`Error fetching projects: ${error.message}`);
+      setLoading(false);
       return;
     }
 
+    console.log("Projects fetched:", data);
     setProjects(data || []);
     setLoading(false);
   }

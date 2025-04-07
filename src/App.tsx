@@ -1,19 +1,68 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import Auth from './app/Auth';
 import TermsOfService from './app/TermsOfService';
 import PrivacyPolicy from './app/PrivacyPolicy';
 import AccountSettings from './app/AccountSettings';
 import HomePage from './app/HomePage';
+import ProtectedRoute from './components/ProtectedRoute';
+import { supabase } from './lib/supabase';
 
 function AppWrapper() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check for user on initial load
+    const checkUser = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        setUser(data.session?.user || null);
+      } catch (error) {
+        console.error('Error checking session:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkUser();
+
+    // Set up auth listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-github-bg flex items-center justify-center">
+        <div className="text-github-text">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <Router>
       <Routes>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/" element={<HomePage />} />
+        {/* Public routes */}
+        <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/account-settings" element={<AccountSettings />} />
+        
+        {/* Protected routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/account-settings" element={<AccountSettings />} />
+        </Route>
+        
+        {/* Fallback route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
