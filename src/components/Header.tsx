@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   PlusCircle, 
   User, 
@@ -12,7 +12,7 @@ import {
   Archive,
   History,
   LayoutDashboard,
-  GitBranch // Add this import
+  GitBranch
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,9 +37,52 @@ export function Header({
 }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [hoverStyle, setHoverStyle] = useState({});
+  const [activeStyle, setActiveStyle] = useState({ left: "0px", width: "0px" });
   const navigate = useNavigate();
   const location = useLocation();
+  const navItemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   
+  // Define navigation items
+  const navItems = [
+    { path: '/dashboard', label: 'Overview', icon: <LayoutDashboard size={14} /> },
+    { path: '/timeline', label: 'Timeline', icon: <History size={14} /> },
+    { path: '/repositories', label: 'Repositories', icon: <GitBranch size={14} /> },
+    { path: '/projects', label: 'Projects', icon: <Book size={14} /> },
+  ];
+
+  // Find current active index
+  const activeIndex = navItems.findIndex(item => location.pathname === item.path);
+
+  // Update hover effect
+  useEffect(() => {
+    if (hoveredIndex !== null) {
+      const hoveredElement = navItemRefs.current[hoveredIndex];
+      if (hoveredElement) {
+        const { offsetLeft, offsetWidth } = hoveredElement;
+        setHoverStyle({
+          left: `${offsetLeft}px`,
+          width: `${offsetWidth}px`,
+        });
+      }
+    }
+  }, [hoveredIndex]);
+
+  // Update active indicator
+  useEffect(() => {
+    if (activeIndex >= 0) {
+      const activeElement = navItemRefs.current[activeIndex];
+      if (activeElement) {
+        const { offsetLeft, offsetWidth } = activeElement;
+        setActiveStyle({
+          left: `${offsetLeft}px`,
+          width: `${offsetWidth}px`,
+        });
+      }
+    }
+  }, [activeIndex, location.pathname]);
+
   // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
@@ -160,77 +203,46 @@ export function Header({
         </div>
       </div>
 
-      {/* Second row - Navigation items for desktop with orange underline for active items */}
+      {/* Second row - Navigation items for desktop with smooth hover effect */}
       {user && !minimal && (
-        <div className="hidden md:block border-t border-github-border bg-github-header-secondary">
+        <div className="hidden md:block border-t border-github-border bg-github-header-secondary relative">
           <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-start h-10">
-              {/* Navigation links with icons and orange underline */}
+            <div className="flex items-end justify-start h-10 relative">
+              {/* Hover background */}
+              <div
+                className="absolute h-8 transition-all duration-200 ease-out bg-github-active-nav/20 rounded-md top-1"
+                style={{
+                  ...hoverStyle,
+                  opacity: hoveredIndex !== null ? 1 : 0,
+                }}
+              />
+
+              {/* Active indicator */}
+              <div
+                className="absolute bottom-0 h-[2px] bg-orange-500 transition-all duration-200 ease-out"
+                style={activeStyle}
+              />
+
+              {/* Navigation links with fixed width */}
               <div className="flex items-center space-x-1">
-                <Link 
-                  to="/dashboard" 
-                  className={cn(
-                    "px-3 py-1 transition-colors flex items-center gap-1.5 h-full relative",
-                    location.pathname === '/dashboard'
-                      ? "text-white font-medium"
-                      : "text-github-text hover:text-white"
-                  )}
-                >
-                  <LayoutDashboard size={14} />
-                  <span>Overview</span>
-                  {location.pathname === '/dashboard' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500"></div>
-                  )}
-                </Link>
-                
-                <Link 
-                  to="/timeline" 
-                  className={cn(
-                    "px-3 py-1 text-sm transition-colors flex items-center gap-1.5 h-full relative",
-                    location.pathname === '/timeline'
-                      ? "text-white font-medium"
-                      : "text-github-text hover:text-white"
-                  )}
-                >
-                  <History size={14} />
-                  <span>Timeline</span>
-                  {location.pathname === '/timeline' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500"></div>
-                  )}
-                </Link>
-                
-                {/* Add the new Repositories link */}
-                <Link 
-                  to="/repositories" 
-                  className={cn(
-                    "px-3 py-1 text-sm transition-colors flex items-center gap-1.5 h-full relative",
-                    location.pathname === '/repositories'
-                      ? "text-white font-medium"
-                      : "text-github-text hover:text-white"
-                  )}
-                >
-                  <GitBranch size={14} />
-                  <span>Repositories</span>
-                  {location.pathname === '/repositories' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500"></div>
-                  )}
-                </Link>
-                
-                <Link 
-                  to="/projects" 
-                  className={cn(
-                    "px-3 py-1 text-sm transition-colors flex items-center gap-1.5 h-full relative",
-                    location.pathname === '/projects'
-                      ? "text-white font-medium"
-                      : "text-github-text hover:text-white"
-                  )}
-                >
-                  <Book size={14} />
-                  <span>Projects</span>
-                  {location.pathname === '/projects' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500"></div>
-                  )}
-                </Link>
+                {navItems.map((item, index) => (
+                  <Link 
+                    key={item.path}
+                    ref={(el) => (navItemRefs.current[index] = el)}
+                    to={item.path}
+                    className={cn(
+                      "px-3 py-1 transition-colors flex items-center gap-1.5 h-full relative w-32 justify-center",
+                      location.pathname === item.path
+                        ? "text-white font-medium"
+                        : "text-github-text hover:text-white"
+                    )}
+                    onMouseEnter={() => setHoveredIndex(index)}
+                    onMouseLeave={() => setHoveredIndex(null)}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
@@ -271,69 +283,24 @@ export function Header({
             <div className="px-4 py-3 space-y-1">
               {user ? (
                 <>
-                  <Link
-                    to="/dashboard"
-                    className={cn(
-                      "block px-3 py-2 rounded-md text-base transition-colors",
-                      location.pathname === '/dashboard'
-                        ? "text-white bg-github-active-nav font-medium"
-                        : "text-github-text hover:text-white"
-                    )}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <LayoutDashboard size={16} />
-                      Dashboard
-                    </div>
-                  </Link>
-                  
-                  <Link
-                    to="/timeline"
-                    className={cn(
-                      "block px-3 py-2 rounded-md text-base transition-colors",
-                      location.pathname === '/timeline'
-                        ? "text-white bg-github-active-nav font-medium"
-                        : "text-github-text hover:text-white"
-                    )}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <History size={16} />
-                      Timeline
-                    </div>
-                  </Link>
-                  
-                  <Link
-                    to="/repositories"
-                    className={cn(
-                      "block px-3 py-2 rounded-md text-base transition-colors",
-                      location.pathname === '/repositories'
-                        ? "text-white bg-github-active-nav font-medium"
-                        : "text-github-text hover:text-white"
-                    )}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <GitBranch size={16} />
-                      Repositories
-                    </div>
-                  </Link>
-                  
-                  <Link
-                    to="/projects"
-                    className={cn(
-                      "block px-3 py-2 rounded-md text-base transition-colors",
-                      location.pathname === '/projects'
-                        ? "text-white bg-github-active-nav font-medium"
-                        : "text-github-text hover:text-white"
-                    )}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Book size={16} />
-                      Projects
-                    </div>
-                  </Link>
+                  {navItems.map(item => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={cn(
+                        "block px-3 py-2 rounded-md text-base transition-colors",
+                        location.pathname === item.path
+                          ? "text-white bg-github-active-nav font-medium"
+                          : "text-github-text hover:text-white"
+                      )}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <div className="flex items-center gap-2">
+                        {React.cloneElement(item.icon as React.ReactElement, { size: 16 })}
+                        {item.label}
+                      </div>
+                    </Link>
+                  ))}
                   
                   <button
                     onClick={() => {
@@ -391,7 +358,7 @@ export function Header({
                   </Link>
                   <Link
                     to="/auth"
-                    className="block px-3 py-2 rounded-md text-base text-github-green hover:text-white transition-colors"
+                    className="block px-3 py-2 rounded-md text-base text-github-text hover:text-white transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign up

@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { X, HelpCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ProjectCard from '../components/ProjectCard';
 import { ProjectForm } from '../components/ProjectForm';
-import { Header } from '../components/Header';
+import { AppContext } from '../App';
 import type { Project, CategoryDisplay } from '../types';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
 
 function HomePage() {
+  const { user, setCreateNewProject } = useContext(AppContext);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -18,7 +19,6 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const [showArchive, setShowArchive] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const [isBlurBackground, setIsBlurBackground] = useState(false);
   const [customCategories, setCustomCategories] = useState<CategoryDisplay[]>(() => {
     // Load from localStorage but don't use defaults
@@ -27,28 +27,28 @@ function HomePage() {
   });
 
   useEffect(() => {
+    // Register the create new project callback with the app context
+    if (setCreateNewProject) {
+      setCreateNewProject(() => handleCreateNew);
+    }
+    
+    return () => {
+      // Clear the callback when component unmounts
+      if (setCreateNewProject) {
+        setCreateNewProject(undefined);
+      }
+    };
+  }, [setCreateNewProject]);
+
+  useEffect(() => {
     setIsBlurBackground(isFormOpen);
   }, [isFormOpen]);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProjects(session.user);
-      }
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProjects(session.user);
-      }
-    });
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, []);
+    if (user) {
+      fetchProjects(user);
+    }
+  }, [user]);
 
   useEffect(() => {
     localStorage.setItem('projectCategories', JSON.stringify(customCategories));
@@ -144,7 +144,11 @@ function HomePage() {
     }
     
     // Filter by tag
-    if (selectedTag && !project.tags.includes(selectedTag)) {
+    if (selectedTag && (typeof project.tags === 'string' 
+      ? !project.tags.includes(selectedTag)
+      : Array.isArray(project.tags) 
+        ? !project.tags.includes(selectedTag)
+        : true)) {
       return false;
     }
     
@@ -170,173 +174,165 @@ function HomePage() {
     setIsFormOpen(true);
   };
 
+  // Function to handle tag clicks for filtering
+  const handleTagClick = (tag: string) => {
+    setSelectedTag(tag);
+  };
+
   return (
-    <div className={cn("min-h-screen bg-github-bg flex flex-col", 
-      isBlurBackground ? "overflow-hidden" : "")}
-    >
-      <Header 
-        user={user} 
-        onCreateNew={handleCreateNew}
-      />
-      
-      <div className="flex-1">
-        <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 w-full">
-          <div className="mb-3 md:mb-4">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={() => setSelectedCategory('all')}
-                  className={cn(
-                    "px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
-                    selectedCategory === 'all'
-                      ? "bg-github-green text-white border-github-green" 
-                      : "bg-github-card text-github-text border-github-border hover:border-github-green"
-                  )}
-                >
-                  All Projects
-                </button>
+    <div className={cn("flex-1", isBlurBackground ? "overflow-hidden" : "")}>
+      <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 w-full">
+        <div className="mb-3 md:mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
+                  selectedCategory === 'all'
+                    ? "bg-github-green text-white border-github-green" 
+                    : "bg-github-card text-github-text border-github-border hover:border-github-green"
+                )}
+              >
+                All Projects
+              </button>
+              
+              {/* Only render categories that users have created */}
+              {customCategories.length > 0 && customCategories.map(category => {
+                // Only show categories that are actually used in projects
+                if (!projectCategories.has(category.id)) return null;
                 
-                {/* Only render categories that users have created */}
-                {customCategories.length > 0 && customCategories.map(category => {
-                  // Only show categories that are actually used in projects
-                  if (!projectCategories.has(category.id)) return null;
-                  
-                  // Get the dynamic icon component safely
-                  let IconComponent = HelpCircle; // Default fallback icon
-                  if (category.icon && typeof category.icon === 'string') {
-                    // @ts-ignore - We're safely handling the case where the icon doesn't exist
-                    IconComponent = LucideIcons[category.icon] || HelpCircle;
-                  }
-                  
-                  return (
-                    <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
-                        selectedCategory === category.id
-                          ? "bg-github-card border-2 border-github-green text-white" 
-                          : "bg-github-card text-github-text border-github-border hover:border-github-green"
-                      )}
-                    >
-                      <IconComponent 
-                        size={14} 
-                        color={selectedCategory === category.id ? category.color : undefined}
-                        className={selectedCategory !== category.id ? "text-github-text" : undefined}
-                      />
-                      <span>{category.label}</span>
-                    </button>
-                  );
-                })}
+                // Get the dynamic icon component safely
+                let IconComponent = HelpCircle; // Default fallback icon
+                if (category.icon && typeof category.icon === 'string') {
+                  // @ts-ignore - We're safely handling the case where the icon doesn't exist
+                  IconComponent = LucideIcons[category.icon] || HelpCircle;
+                }
                 
-                {/* Show uncategorized projects button if there are any */}
-                {projects.some(p => !p.categories) && (
+                return (
                   <button
-                    onClick={() => setSelectedCategory('uncategorized')}
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
-                      selectedCategory === 'uncategorized'
+                      selectedCategory === category.id
                         ? "bg-github-card border-2 border-github-green text-white" 
                         : "bg-github-card text-github-text border-github-border hover:border-github-green"
                     )}
                   >
-                    <HelpCircle 
+                    <IconComponent 
                       size={14} 
-                      className={selectedCategory !== 'uncategorized' ? "text-github-text" : undefined}
+                      color={selectedCategory === category.id ? category.color : undefined}
+                      className={selectedCategory !== category.id ? "text-github-text" : undefined}
                     />
-                    <span>Uncategorized</span>
+                    <span>{category.label}</span>
                   </button>
-                )}
-              </div>
-                
-              {/* Archive toggle moved here */}
-              <button
-                onClick={() => setShowArchive(!showArchive)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
-                  showArchive
-                    ? "bg-github-card border-2 border-github-green text-white" 
-                    : "bg-github-card text-github-text border-github-border hover:border-github-green"
-                )}
-              >
-                <LucideIcons.Archive
-                  size={14} 
-                  className={!showArchive ? "text-github-text" : undefined}
-                />
-                <span>Archive</span> 
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2 mt-3 md:mt-4">
-              {selectedTag && (
-                <span className="px-2 py-1 bg-github-card text-github-text rounded-full text-xs border border-github-border flex items-center gap-1">
-                  {selectedTag}
-                  <button
-                    onClick={() => setSelectedTag(null)}
-                    className="ml-1 text-github-text hover:text-white"
-                  >
-                    <X size={12} />
-                  </button> 
-                </span>
+                );
+              })}
+              
+              {/* Show uncategorized projects button if there are any */}
+              {projects.some(p => !p.categories) && (
+                <button
+                  onClick={() => setSelectedCategory('uncategorized')}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
+                    selectedCategory === 'uncategorized'
+                      ? "bg-github-card border-2 border-github-green text-white" 
+                      : "bg-github-card text-github-text border-github-border hover:border-github-green"
+                  )}
+                >
+                  <HelpCircle 
+                    size={14} 
+                    className={selectedCategory !== 'uncategorized' ? "text-github-text" : undefined}
+                  />
+                  <span>Uncategorized</span>
+                </button>
               )}
             </div>
+              
+            {/* Archive toggle moved here */}
+            <button
+              onClick={() => setShowArchive(!showArchive)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
+                showArchive
+                  ? "bg-github-card border-2 border-github-green text-white" 
+                  : "bg-github-card text-github-text border-github-border hover:border-github-green"
+              )}
+            >
+              <LucideIcons.Archive
+                size={14} 
+                className={!showArchive ? "text-github-text" : undefined}
+              />
+              <span>Archive</span> 
+            </button>
           </div>
 
-          {loading ? (
-            <div className="text-left text-github-text">Loading projects...</div>
-          ) : projects.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-github-text mb-4">No projects yet</div>
-              <button
-                onClick={handleCreateNew}
-                className="px-4 py-2 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors"
-              >
-                Create Your First Project
-              </button>
-            </div>
-          ) : filteredProjects.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-github-text mb-4">
-                No projects match your current filters
-              </div>
-              <button
-                onClick={() => {
-                  setSelectedCategory('all');
-                  setSelectedTag(null);
-                }}
-                className="px-4 py-2 bg-github-card border border-github-border text-github-text hover:text-white rounded-md transition-colors"
-              >
-                Clear Filters
-              </button>
-            </div>
-          ) : (
-            <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-              <AnimatePresence>
-                {sortedProjects.map(project => (
-                  <motion.div
-                    key={project.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <ProjectCard
-                      project={project}
-                      onEdit={project => {
-                        setEditingProject(project);
-                        setIsFormOpen(true);
-                      }}
-                      onToggleStarted={handleToggleStarted}
-                      onStatusChange={handleToggleStarted}
-                      setToast={setToast}
-                      onTagClick={setSelectedTag}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-          )}
+          <div className="flex items-center gap-2 mt-3 md:mt-4">
+            {selectedTag && (
+              <span className="px-2 py-1 bg-github-card text-github-text rounded-full text-xs border border-github-border flex items-center gap-1">
+                {selectedTag}
+                <button
+                  onClick={() => setSelectedTag(null)}
+                  className="ml-1 text-github-text hover:text-white"
+                >
+                  <X size={12} />
+                </button> 
+              </span>
+            )}
+          </div>
         </div>
+
+        {loading ? (
+          <div className="text-left text-github-text">Loading projects...</div>
+        ) : projects.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-github-text mb-4">No projects yet</div>
+            <button
+              onClick={handleCreateNew}
+              className="px-4 py-2 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors"
+            >
+              Create Your First Project
+            </button>
+          </div>
+        ) : filteredProjects.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-github-text mb-4">
+              No projects match your current filters
+            </div>
+            <button
+              onClick={() => {
+                setSelectedCategory('all');
+                setSelectedTag(null);
+              }}
+              className="px-4 py-2 bg-github-card border border-github-border text-github-text hover:text-white rounded-md transition-colors"
+            >
+              Clear Filters
+            </button>
+          </div>
+        ) : (
+          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+            <AnimatePresence>
+              {sortedProjects.map(project => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ProjectCard
+                    project={project}
+                    onClick={() => {
+                      setEditingProject(project);
+                      setIsFormOpen(true);
+                    }}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
       </div>
 
       {/* Project Form Modal */}

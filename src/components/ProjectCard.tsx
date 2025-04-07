@@ -1,38 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  PlayCircle, 
-  ArrowUpRight, 
-  CheckCircle, 
-  Flag, 
-  Lightbulb, 
-  Calendar, 
-  ExternalLink, 
   Check, 
   Clock, 
   AlertTriangle, 
   Tag, 
   Star, 
-  StarHalf 
+  StarHalf, 
+  ExternalLink 
 } from 'lucide-react';
-import type { Project, ProjectStatus } from '../types'; // Import ProjectStatus type
-import { cn } from '../lib/utils';
-
-interface ProjectLink {
-  title: string;
-  url: string;
-}
+import type { Project } from '../types';
 
 interface ProjectCardProps {
   project: Project;
-  onEdit: (project: Project) => void;
-  onToggleStarted: (project: Project) => void;
-  onStatusChange: (project: Project) => void;
-  setToast: (message: string | null) => void;
-  onTagClick: (tag: string) => void;
+  onClick?: () => void;
 }
 
-function ProjectCard({ project, onClick }: { project: Project, onClick?: () => void }) {
+function ProjectCard({ project, onClick }: ProjectCardProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':

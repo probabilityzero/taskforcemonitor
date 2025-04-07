@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { supabase } from '../lib/supabase';
-import { Header } from '../components/Header';
 import { motion } from 'framer-motion';
 import { Calendar, GitBranch, GitMerge, CheckCircle, AlertTriangle, Plus, Clock, Edit, Archive } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { AppContext } from '../App';
 
 interface TimelineEvent {
   id: string;
@@ -43,21 +43,19 @@ function formatRelativeTime(dateString: string): string {
 }
 
 function Timeline() {
-  const [user, setUser] = useState<any>(null);
+  const { user } = useContext(AppContext);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
       if (session?.user) {
         fetchTimeline(session.user);
       }
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
       if (session?.user) {
         fetchTimeline(session.user);
       }
@@ -206,131 +204,75 @@ function Timeline() {
     : events;
 
   return (
-    <div className="min-h-screen bg-github-bg flex flex-col">
-      <Header 
-        user={user} 
-        minimal={false}
-      />
-      
-      <div className="flex-1">
-        <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-6 w-full">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-white">Activity Timeline</h1>
-            
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setFilter(null)}
-                className={cn(
-                  "px-2 py-1 text-xs rounded-md border transition-colors",
-                  filter === null
-                    ? "bg-github-green text-white border-github-green"
-                    : "bg-github-card text-github-text border-github-border"
-                )}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilter('create')}
-                className={cn(
-                  "px-2 py-1 text-xs rounded-md border transition-colors",
-                  filter === 'create'
-                    ? "bg-github-green text-white border-github-green"
-                    : "bg-github-card text-github-text border-github-border"
-                )}
-              >
-                Created
-              </button>
-              <button
-                onClick={() => setFilter('start')}
-                className={cn(
-                  "px-2 py-1 text-xs rounded-md border transition-colors",
-                  filter === 'start'
-                    ? "bg-github-green text-white border-github-green"
-                    : "bg-github-card text-github-text border-github-border"
-                )}
-              >
-                Started
-              </button>
-              <button
-                onClick={() => setFilter('complete')}
-                className={cn(
-                  "px-2 py-1 text-xs rounded-md border transition-colors",
-                  filter === 'complete'
-                    ? "bg-github-green text-white border-github-green"
-                    : "bg-github-card text-github-text border-github-border"
-                )}
-              >
-                Completed
-              </button>
-            </div>
+    <div className="flex-1">
+      <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-6">
+        <h1 className="text-2xl font-bold text-white mb-6">Activity Timeline</h1>
+        
+        {loading ? (
+          <div className="text-github-text">Loading timeline...</div>
+        ) : events.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-github-text mb-4">No activity yet</div>
+            <p className="text-github-text opacity-60">
+              Your project activity will appear here once you start creating projects.
+            </p>
           </div>
-          
-          {loading ? (
-            <div className="text-github-text">Loading timeline...</div>
-          ) : events.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-github-text mb-4">No activity yet</div>
-              <p className="text-github-text opacity-60">
-                Your project activity will appear here once you start creating projects.
-              </p>
-            </div>
-          ) : filteredEvents.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-github-text mb-4">No matching activities</div>
-              <button
-                onClick={() => setFilter(null)}
-                className="px-4 py-2 bg-github-card border border-github-border text-github-text hover:text-white rounded-md transition-colors"
-              >
-                Show all activities
-              </button>
-            </div>
-          ) : (
-            <div className="relative">
-              {/* Timeline line */}
-              <div className="absolute left-6 top-0 bottom-0 w-px bg-github-border"></div>
-              
-              {/* Events */}
-              <div className="space-y-6">
-                {filteredEvents.map((event, index) => (
-                  <motion.div
-                    key={event.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.2 }}
-                    className={cn(
-                      "pl-14 relative",
-                      getEventColor(event.type)
-                    )}
-                  >
-                    {/* Timeline dot */}
-                    <div className="absolute left-4 w-4 h-4 rounded-full bg-github-card border-4 border-github-border transform -translate-x-1/2 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-github-green"></div>
-                    </div>
-                    
-                    <div className="border border-github-border rounded-md overflow-hidden">
-                      <div className="p-4 bg-github-card">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-full bg-github-bg">
-                            {getEventIcon(event.type)}
+        ) : filteredEvents.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-github-text mb-4">No matching activities</div>
+            <button
+              onClick={() => setFilter(null)}
+              className="px-4 py-2 bg-github-card border border-github-border text-github-text hover:text-white rounded-md transition-colors"
+            >
+              Show all activities
+            </button>
+          </div>
+        ) : (
+          <div className="relative">
+            {/* Timeline line */}
+            <div className="absolute left-6 top-0 bottom-0 w-px bg-github-border"></div>
+            
+            {/* Events */}
+            <div className="space-y-6">
+              {filteredEvents.map((event, index) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.2 }}
+                  className={cn(
+                    "pl-14 relative",
+                    getEventColor(event.type)
+                  )}
+                >
+                  {/* Timeline dot */}
+                  <div className="absolute left-4 w-4 h-4 rounded-full bg-github-card border-4 border-github-border transform -translate-x-1/2 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-github-green"></div>
+                  </div>
+                  
+                  <div className="border border-github-border rounded-md overflow-hidden">
+                    <div className="p-4 bg-github-card">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-full bg-github-bg">
+                          {getEventIcon(event.type)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-white">
+                            {getEventTitle(event)}
                           </div>
-                          <div className="flex-1">
-                            <div className="font-medium text-white">
-                              {getEventTitle(event)}
-                            </div>
-                            <div className="text-sm text-github-text flex items-center gap-2 mt-1">
-                              <Calendar size={12} />
-                              <span>{formatRelativeTime(event.created_at)}</span>
-                            </div>
+                          <div className="text-sm text-github-text flex items-center gap-2 mt-1">
+                            <Calendar size={12} />
+                            <span>{formatRelativeTime(event.created_at)}</span>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
