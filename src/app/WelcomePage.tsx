@@ -242,75 +242,75 @@ export default function WelcomePage() {
       {/* Hero Section */}
       <main className="relative z-[1]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
-          <div className="grid md:grid-cols-3 items-center gap-8 md:gap-12">
-            {/* Left column - Text content */}
-            <div className="grid md:grid-cols-2">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-                  Organize and track all your projects <span className="text-github-green">effortlessly</span>
-                </h1>
-                
-                <p className="text-xl text-github-text mb-8 max-w-2xl">
-                  Task Force Monitor helps you keep track of all your ideas, ongoing work, and completed projects in one beautiful dashboard.
-                </p>
-                
-                {!user ? (
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      onClick={() => {
-                        setAuthMode('signup');
-                        setShowAuthForm(true);
-                      }}
-                      className="flex items-center gap-2 px-6 py-3 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-lg"
-                    >
-                      Get Started <ArrowRight />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setAuthMode('login');
-                        setShowAuthForm(true);
-                      }}
-                      className="flex items-center gap-2 px-6 py-3 bg-github-card border border-github-border text-github-text hover:text-white rounded-md transition-colors text-lg"
-                    >
-                      Sign In <LogIn size={18} />
-                    </button>
-                  </div>
-                ) : (
+          {/* Updated hero layout */}
+          <div className="w-full lg:w-1/2 mx-auto">
+            {/* Hero content */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-12"
+            >
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+                Organize and track all your projects <span className="text-github-green">effortlessly</span>
+              </h1>
+              
+              <p className="text-xl text-github-text mb-8">
+                Task Force Monitor helps you keep track of all your ideas, ongoing work, and completed projects in one beautiful dashboard.
+              </p>
+              
+              {!user ? (
+                <div className="flex flex-wrap gap-3">
                   <button
-                    onClick={() => navigate('/dashboard')}
+                    onClick={() => {
+                      setAuthMode('signup');
+                      setShowAuthForm(true);
+                    }}
                     className="flex items-center gap-2 px-6 py-3 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-lg"
                   >
-                    Go to Dashboard <ArrowRight />
+                    Get Started <ArrowRight />
                   </button>
-                )}
-              </motion.div>
-
-              {/* Features grid */}
-              <motion.div 
-                className="grid grid-cols-2 gap-4 sm:gap-6 mt-16"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-              >
-                {features.map((feature, index) => (
-                  <motion.div
-                    key={index}
-                    className="bg-github-card/80 backdrop-blur-sm p-5 rounded-lg border border-github-border"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 + index * 0.1, duration: 0.3 }}
+                  <button
+                    onClick={() => {
+                      setAuthMode('login');
+                      setShowAuthForm(true);
+                    }}
+                    className="flex items-center gap-2 px-6 py-3 bg-github-card border border-github-border text-github-text hover:text-white rounded-md transition-colors text-lg"
                   >
-                    <div className="text-2xl mb-3">{feature.icon}</div>
-                    <h3 className="text-lg font-medium text-white mb-2">{feature.title}</h3>
-                    <p className="text-github-text">{feature.description}</p>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
+                    Sign In <LogIn size={18} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="flex items-center gap-2 px-6 py-3 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-lg"
+                >
+                  Go to Dashboard <ArrowRight />
+                </button>
+              )}
+            </motion.div>
+
+            {/* Features grid */}
+            <motion.div 
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+            >
+              {features.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-github-card/80 backdrop-blur-sm p-5 rounded-lg border border-github-border"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + index * 0.1, duration: 0.3 }}
+                >
+                  <div className="text-2xl mb-3">{feature.icon}</div>
+                  <h3 className="text-lg font-medium text-white mb-2">{feature.title}</h3>
+                  <p className="text-github-text">{feature.description}</p>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </div>
 

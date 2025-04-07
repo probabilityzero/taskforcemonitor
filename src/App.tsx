@@ -6,6 +6,7 @@ import PrivacyPolicy from './app/PrivacyPolicy';
 import AccountSettings from './app/AccountSettings';
 import HomePage from './app/HomePage';
 import WelcomePage from './app/WelcomePage';
+import Timeline from './app/Timeline';
 import ProtectedRoute from './components/ProtectedRoute';
 import { supabase } from './lib/supabase';
 
@@ -20,7 +21,7 @@ function AppWrapper() {
         const { data } = await supabase.auth.getSession();
         setUser(data.session?.user || null);
       } catch (error) {
-        console.error('Error checking session:', error);
+        // Silently handle error
       } finally {
         setIsLoading(false);
       }
@@ -60,6 +61,7 @@ function AppWrapper() {
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<HomePage />} />
+          <Route path="/timeline" element={<Timeline />} />
           <Route path="/account-settings" element={<AccountSettings />} />
         </Route>
         

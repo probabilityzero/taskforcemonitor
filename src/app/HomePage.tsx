@@ -177,77 +177,94 @@ function HomePage() {
       <Header 
         user={user} 
         onCreateNew={handleCreateNew}
-        showArchive={showArchive}
-        onToggleArchive={() => setShowArchive(!showArchive)}
       />
       
       <div className="flex-1">
         <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 w-full">
           <div className="mb-3 md:mb-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => setSelectedCategory('all')}
-                className={cn(
-                  "px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
-                  selectedCategory === 'all'
-                    ? "bg-github-green text-white border-github-green" 
-                    : "bg-github-card text-github-text border-github-border hover:border-github-green"
-                )}
-              >
-                All Projects
-              </button>
-              
-              {/* Only render categories that users have created */}
-              {customCategories.length > 0 && customCategories.map(category => {
-                // Only show categories that are actually used in projects
-                if (!projectCategories.has(category.id)) return null;
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setSelectedCategory('all')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
+                    selectedCategory === 'all'
+                      ? "bg-github-green text-white border-github-green" 
+                      : "bg-github-card text-github-text border-github-border hover:border-github-green"
+                  )}
+                >
+                  All Projects
+                </button>
                 
-                // Get the dynamic icon component safely
-                let IconComponent = HelpCircle; // Default fallback icon
-                if (category.icon && typeof category.icon === 'string') {
-                  // @ts-ignore - We're safely handling the case where the icon doesn't exist
-                  IconComponent = LucideIcons[category.icon] || HelpCircle;
-                }
+                {/* Only render categories that users have created */}
+                {customCategories.length > 0 && customCategories.map(category => {
+                  // Only show categories that are actually used in projects
+                  if (!projectCategories.has(category.id)) return null;
+                  
+                  // Get the dynamic icon component safely
+                  let IconComponent = HelpCircle; // Default fallback icon
+                  if (category.icon && typeof category.icon === 'string') {
+                    // @ts-ignore - We're safely handling the case where the icon doesn't exist
+                    IconComponent = LucideIcons[category.icon] || HelpCircle;
+                  }
+                  
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
+                        selectedCategory === category.id
+                          ? "bg-github-card border-2 border-github-green text-white" 
+                          : "bg-github-card text-github-text border-github-border hover:border-github-green"
+                      )}
+                    >
+                      <IconComponent 
+                        size={14} 
+                        color={selectedCategory === category.id ? category.color : undefined}
+                        className={selectedCategory !== category.id ? "text-github-text" : undefined}
+                      />
+                      <span>{category.label}</span>
+                    </button>
+                  );
+                })}
                 
-                return (
+                {/* Show uncategorized projects button if there are any */}
+                {projects.some(p => !p.categories) && (
                   <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
+                    onClick={() => setSelectedCategory('uncategorized')}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
-                      selectedCategory === category.id
+                      selectedCategory === 'uncategorized'
                         ? "bg-github-card border-2 border-github-green text-white" 
                         : "bg-github-card text-github-text border-github-border hover:border-github-green"
                     )}
                   >
-                    <IconComponent 
+                    <HelpCircle 
                       size={14} 
-                      color={selectedCategory === category.id ? category.color : undefined}
-                      className={selectedCategory !== category.id ? "text-github-text" : undefined}
+                      className={selectedCategory !== 'uncategorized' ? "text-github-text" : undefined}
                     />
-                    <span>{category.label}</span>
+                    <span>Uncategorized</span>
                   </button>
-                );
-              })}
-              
-              {/* Show uncategorized projects button if there are any */}
-              {projects.some(p => !p.categories) && (
-                <button
-                  onClick={() => setSelectedCategory('uncategorized')}
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
-                    selectedCategory === 'uncategorized'
-                      ? "bg-github-card border-2 border-github-green text-white" 
-                      : "bg-github-card text-github-text border-github-border hover:border-github-green"
-                  )}
-                >
-                  <HelpCircle 
-                    size={14} 
-                    className={selectedCategory !== 'uncategorized' ? "text-github-text" : undefined}
-                  />
-                  <span>Uncategorized</span>
-                </button>
-              )}
+                )}
+              </div>
+                
+              {/* Archive toggle moved here */}
+              <button
+                onClick={() => setShowArchive(!showArchive)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
+                  showArchive
+                    ? "bg-github-card border-2 border-github-green text-white" 
+                    : "bg-github-card text-github-text border-github-border hover:border-github-green"
+                )}
+              >
+                <Archive 
+                  size={14} 
+                  className={!showArchive ? "text-github-text" : undefined}
+                />
+                <span>Archive</span>
+              </button>
             </div>
 
             <div className="flex items-center gap-2 mt-3 md:mt-4">

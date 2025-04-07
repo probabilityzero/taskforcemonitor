@@ -9,7 +9,9 @@ import {
   Book,
   Settings,
   Home,
-  Archive
+  Archive,
+  History,
+  LayoutDashboard
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -66,10 +68,24 @@ export function Header({
       {/* Top row - Logo, New button, and Profile */}
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
-          {/* Mobile menu button */}
-          <div className="flex md:hidden">
+          {/* Logo - Positioned to the left and improved sizing */}
+          <div className="flex items-center flex-shrink-0">
+            <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2">
+              <img 
+                src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg"
+                alt="Task Force Monitor" 
+                className="w-6 h-6" 
+              />
+              <h1 className="text-lg font-semibold text-github-text hidden xs:block">
+                Task Force <span className="font-thin ml-1.5">Monitor</span>
+              </h1>
+            </Link>
+          </div>
+          
+          {/* Mobile menu button - moved to the right */}
+          <div className="flex md:hidden ml-auto">
             <button
-              className="text-github-text hover:text-white transition-colors"
+              className="text-github-text hover:text-white transition-colors ml-2"
               onClick={(e) => {
                 stopPropagation(e);
                 setIsMenuOpen(!isMenuOpen);
@@ -79,31 +95,15 @@ export function Header({
             </button>
           </div>
 
-          {/* Logo */}
-          <div className="flex items-center flex-shrink-0">
-            <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2">
-              <img 
-                src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg"
-                alt="Task Force Monitor" 
-                className="w-7 h-7" 
-              />
-              {!minimal && (
-                <h1 className="text-lg font-semibold text-github-text hidden md:flex">
-                  Task Force <span className="font-thin ml-1.5">Monitor</span>
-                </h1>
-              )}
-            </Link>
-          </div>
-
           {/* Right side buttons - visible on all sizes */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-2 md:ml-0">
             {user && !minimal && (
               <button
                 onClick={(e) => {
                   stopPropagation(e);
                   if (onCreateNew) onCreateNew();
                 }}
-                className="flex items-center gap-1 px-2 py-1 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
+                className="hidden md:flex items-center gap-1 px-2 py-1 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
               >
                 <PlusCircle className="w-4 h-4" />
                 <span>New</span>
@@ -159,63 +159,68 @@ export function Header({
         </div>
       </div>
 
-      {/* Second row - Navigation items for desktop */}
+      {/* Second row - Navigation items for desktop with orange underline for active items */}
       {user && !minimal && (
         <div className="hidden md:block border-t border-github-border bg-github-header-secondary">
           <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-10">
-              {/* Navigation links */}
+              {/* Navigation links with icons and orange underline */}
               <div className="flex items-center space-x-1">
                 <Link 
                   to="/dashboard" 
                   className={cn(
-                    "px-3 py-1 rounded-md text-sm transition-colors",
+                    "px-3 py-1 text-sm transition-colors flex items-center gap-1.5 h-full relative",
                     location.pathname === '/dashboard'
-                      ? "text-white bg-github-active-nav font-medium"
+                      ? "text-white font-medium"
                       : "text-github-text hover:text-white"
                   )}
                 >
-                  Dashboard
+                  <LayoutDashboard size={14} />
+                  <span>Dashboard</span>
+                  {location.pathname === '/dashboard' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500"></div>
+                  )}
                 </Link>
+                
+                <Link 
+                  to="/timeline" 
+                  className={cn(
+                    "px-3 py-1 text-sm transition-colors flex items-center gap-1.5 h-full relative",
+                    location.pathname === '/timeline'
+                      ? "text-white font-medium"
+                      : "text-github-text hover:text-white"
+                  )}
+                >
+                  <History size={14} />
+                  <span>Timeline</span>
+                  {location.pathname === '/timeline' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500"></div>
+                  )}
+                </Link>
+                
                 <Link 
                   to="/projects" 
                   className={cn(
-                    "px-3 py-1 rounded-md text-sm transition-colors",
+                    "px-3 py-1 text-sm transition-colors flex items-center gap-1.5 h-full relative",
                     location.pathname === '/projects'
-                      ? "text-white bg-github-active-nav font-medium"
+                      ? "text-white font-medium"
                       : "text-github-text hover:text-white"
                   )}
                 >
-                  Projects
-                </Link>
-                <Link 
-                  to="/tasks" 
-                  className={cn(
-                    "px-3 py-1 rounded-md text-sm transition-colors",
-                    location.pathname === '/tasks'
-                      ? "text-white bg-github-active-nav font-medium"
-                      : "text-github-text hover:text-white"
+                  <Book size={14} />
+                  <span>Projects</span>
+                  {location.pathname === '/projects' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500"></div>
                   )}
-                >
-                  Tasks
                 </Link>
               </div>
 
-              {/* Archive toggle button */}
-              {onToggleArchive && (
-                <button
-                  onClick={onToggleArchive}
-                  className={cn(
-                    "flex items-center gap-1 px-2 py-1 rounded-md text-xs border transition-colors",
-                    showArchive 
-                      ? "bg-github-green text-white border-github-green" 
-                      : "bg-github-card text-github-text border-github-border"
-                  )}
-                >
-                  <Archive size={12} />
-                  <span>Show Archive</span>
-                </button>
-              )}
+              {/* Page title area - can be used to show current page name */}
+              <div className="text-sm text-github-text font-medium">
+                {location.pathname === '/dashboard' && 'Home Dashboard'}
+                {location.pathname === '/timeline' && 'Activity Timeline'}
+                {location.pathname === '/projects' && 'All Projects'}
+              </div>
             </div>
           </div>
         </div>
@@ -237,7 +242,7 @@ export function Header({
                 <img 
                   src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg"
                   alt="Task Force Monitor" 
-                  className="w-5 h-5 mr-2" 
+                  className="w-6 h-6 mr-2" 
                 />
                 <h1 className="text-sm font-semibold text-github-text">
                   Task Force <span className="font-thin">Monitor</span>
@@ -266,10 +271,27 @@ export function Header({
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <div className="flex items-center gap-2">
-                      <Home size={16} />
+                      <LayoutDashboard size={16} />
                       Dashboard
                     </div>
                   </Link>
+                  
+                  <Link
+                    to="/timeline"
+                    className={cn(
+                      "block px-3 py-2 rounded-md text-base transition-colors",
+                      location.pathname === '/timeline'
+                        ? "text-white bg-github-active-nav font-medium"
+                        : "text-github-text hover:text-white"
+                    )}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <History size={16} />
+                      Timeline
+                    </div>
+                  </Link>
+                  
                   <Link
                     to="/projects"
                     className={cn(
@@ -286,25 +308,6 @@ export function Header({
                     </div>
                   </Link>
                   
-                  {/* Archive toggle in mobile menu */}
-                  {onToggleArchive && (
-                    <button
-                      onClick={() => {
-                        onToggleArchive();
-                        setIsMenuOpen(false);
-                      }}
-                      className={cn(
-                        "w-full text-left flex items-center gap-2 px-3 py-2 rounded-md text-base transition-colors",
-                        showArchive
-                          ? "text-github-green font-medium"
-                          : "text-github-text hover:text-white"
-                      )}
-                    >
-                      <Archive size={16} />
-                      {showArchive ? "Hide Archive" : "Show Archive"}
-                    </button>
-                  )}
-                  
                   <button
                     onClick={() => {
                       if (onCreateNew) onCreateNew();
@@ -317,6 +320,7 @@ export function Header({
                       New Project
                     </div>
                   </button>
+                  
                   <Link
                     to="/account-settings"
                     className={cn(
