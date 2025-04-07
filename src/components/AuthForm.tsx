@@ -11,6 +11,7 @@ interface AuthFormProps {
   compact?: boolean;
   showWelcomeText?: boolean;
   onSuccess?: () => void;
+  onClose?: () => void;
   initialMode?: 'login' | 'signup';
 }
 
