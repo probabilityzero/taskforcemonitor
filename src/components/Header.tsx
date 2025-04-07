@@ -138,15 +138,15 @@ export function Header({
             </div>
             
             {/* Logo with redesigned text styling */}
-            <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2">
+            <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-3">
               <img 
                 src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg"
                 alt="Task Force Monitor" 
                 className="w-6 h-6" 
               />
               <div className="text-lg flex items-baseline">
-                <span className="font-light text-github-text">Task Force</span>
-                <span className="font-semibold text-white ml-1.5">Monitor</span>
+                <span className="font-semibold text-github-text">Task Force</span>
+                <span className="font-light text-white ml-1.5">Monitor</span>
               </div>
             </Link>
           </div>
@@ -159,8 +159,8 @@ export function Header({
                 className="flex items-center gap-1 px-2 py-1 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
               >
                 <Plus className="w-4 h-4" />
-                <span className='block md:hidden'>New Project</span> 
-                <span className='hidden md:block'>New</span>
+                <span className='block md:hidden'>New</span> 
+                <span className='hidden md:block'>New Project</span>
               </button>
             )}
 
@@ -270,7 +270,7 @@ export function Header({
             onClick={stopPropagation}
           >
             {/* Mobile menu header */}
-            <div className="flex items-center justify-between h-14 px-4 border-b border-github-border">
+            <div className="flex items-center justify-between h-15 px-4 border-b border-github-border">
               <div className="flex items-center">
                 <img 
                   src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg"
@@ -278,8 +278,8 @@ export function Header({
                   className="w-6 h-6 mr-2" 
                 />
                 <div className="flex items-baseline">
-                  <span className="text-sm font-light text-github-text">Task Force</span>
-                  <span className="text-sm font-semibold text-white ml-1">Monitor</span>
+                  <span className="text-sm font-semibold text-github-text">Task Force</span>
+                  <span className="text-sm font-light text-white ml-1">Monitor</span>
                 </div>
               </div>
               <button
@@ -312,19 +312,6 @@ export function Header({
                       </div>
                     </Link>
                   ))}
-                  
-                  <button
-                    onClick={(e) => {
-                      handleCreateNew(e);
-                      setIsMenuOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-md text-base text-github-text hover:text-white transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Plus size={16} />
-                      New Project
-                    </div>
-                  </button>
                   
                   <Link
                     to="/account-settings"
