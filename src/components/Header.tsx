@@ -144,7 +144,7 @@ export function Header({
                 alt="Task Force Monitor" 
                 className="w-6 h-6" 
               />
-              <div className="text-lg hidden xs:flex items-baseline">
+              <div className="text-lg flex items-baseline">
                 <span className="font-light text-github-text">Task Force</span>
                 <span className="font-semibold text-white ml-1.5">Monitor</span>
               </div>
@@ -156,10 +156,11 @@ export function Header({
             {user && !minimal && (
               <button
                 onClick={handleCreateNew}
-                className="hidden md:flex items-center gap-1 px-2 py-1 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
+                className="flex items-center gap-1 px-2 py-1 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-sm"
               >
                 <Plus className="w-4 h-4" />
-                <span>New Project</span>
+                <span className='block md:hidden'>New Project</span> 
+                <span className='hidden md:block'>New</span>
               </button>
             )}
 

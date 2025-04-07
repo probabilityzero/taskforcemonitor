@@ -8,8 +8,6 @@ import { Link } from 'react-router-dom';
 import { 
   ArrowUpDown, 
   Check, 
-  Calendar, 
-  Tag, 
   Search, 
   Plus, 
   AlertTriangle,
@@ -18,7 +16,7 @@ import {
   LightbulbIcon,
   Star,
   ChevronDown,
-  Filter,
+  Tag,
   X
 } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -241,138 +239,141 @@ export default function Projects() {
 
         {/* Search and filters */}
         <div className="mb-8 space-y-4">
-          {/* Search input */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-github-text" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search projects..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-github-border rounded-md bg-github-input text-github-text focus:outline-none focus:ring-1 focus:ring-github-blue focus:border-github-blue"
-            />
-          </div>
-          
-          {/* Status and Category filter dropdowns */}
-          <div className="flex flex-wrap gap-2">
-            {/* Status dropdown */}
-            <div className="relative" ref={statusRef}>
-              <button
-                onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
-                className={cn(
-                  "flex items-center gap-1 px-3 py-1.5 rounded-md text-sm border transition-colors",
-                  selectedStatuses.length > 0 
-                    ? "bg-github-fg/70 border-github-border-hover text-white" 
-                    : "bg-github-input border-github-border text-github-text hover:text-white"
-                )}
-              >
-                Status {selectedStatuses.length > 0 && `(${selectedStatuses.length})`}
-                <ChevronDown size={14} className={statusDropdownOpen ? "rotate-180" : ""} />
-              </button>
-              
-              {statusDropdownOpen && (
-                <div className="absolute top-full left-0 z-10 mt-1 bg-github-card border border-github-border rounded-md shadow-lg w-48 py-1">
-                  <div className="px-3 py-2 border-b border-github-border">
-                    <h4 className="text-sm font-medium text-white">Filter by status</h4>
-                  </div>
-                  <div className="max-h-48 overflow-y-auto">
-                    {['concept', 'started', 'completed', 'abandonded'].map(status => (
-                      <button
-                        key={status}
-                        onClick={() => handleStatusToggle(status)}
-                        className="w-full px-3 py-2 flex items-center gap-2 hover:bg-github-fg/30 transition-colors"
-                      >
-                        <div className="w-4 h-4 flex items-center justify-center">
-                          {selectedStatuses.includes(status) && <Check size={14} className="text-white" />}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-sm text-white">
-                          {getStatusIcon(status, 14)}
-                          <span>{getStatusText(status)}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                  {selectedStatuses.length > 0 && (
-                    <div className="px-3 py-2 border-t border-github-border">
-                      <button
-                        onClick={() => setSelectedStatuses([])}
-                        className="text-xs text-github-text hover:text-white transition-colors"
-                      >
-                        Clear filter
-                      </button>
-                    </div>
+          {/* Status and Category filter dropdowns moved to left of search */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Status and Category dropdowns - side by side for medium screens and up */}
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto sm:flex-nowrap">
+              {/* Status dropdown */}
+              <div className="relative flex-grow sm:flex-grow-0" ref={statusRef}>
+                <button
+                  onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
+                  className={cn(
+                    "w-full sm:w-auto flex items-center justify-between sm:justify-start gap-1 px-3 py-1.5 rounded-md text-sm border transition-colors",
+                    selectedStatuses.length > 0 
+                      ? "bg-github-fg/70 border-github-border-hover text-white" 
+                      : "bg-github-input border-github-border text-github-text hover:text-white"
                   )}
-                </div>
-              )}
-            </div>
-            
-            {/* Category dropdown */}
-            <div className="relative" ref={categoryRef}>
-              <button
-                onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                className={cn(
-                  "flex items-center gap-1 px-3 py-1.5 rounded-md text-sm border transition-colors",
-                  selectedCategories.length > 0 
-                    ? "bg-github-fg/70 border-github-border-hover text-white" 
-                    : "bg-github-input border-github-border text-github-text hover:text-white"
-                )}
-              >
-                Category {selectedCategories.length > 0 && `(${selectedCategories.length})`}
-                <ChevronDown size={14} className={categoryDropdownOpen ? "rotate-180" : ""} />
-              </button>
-              
-              {categoryDropdownOpen && (
-                <div className="absolute top-full left-0 z-10 mt-1 bg-github-card border border-github-border rounded-md shadow-lg w-48 py-1">
-                  <div className="px-3 py-2 border-b border-github-border">
-                    <h4 className="text-sm font-medium text-white">Filter by category</h4>
-                  </div>
-                  <div className="max-h-48 overflow-y-auto">
-                    {allCategories.length === 0 ? (
-                      <div className="px-3 py-2 text-sm text-github-text">No categories found</div>
-                    ) : (
-                      allCategories.map(category => (
+                >
+                  <span className="truncate">Status {selectedStatuses.length > 0 && `(${selectedStatuses.length})`}</span>
+                  <ChevronDown size={14} className={statusDropdownOpen ? "rotate-180 flex-shrink-0" : "flex-shrink-0"} />
+                </button>
+                
+                {statusDropdownOpen && (
+                  <div className="absolute top-full left-0 z-10 mt-1 bg-github-card border border-github-border rounded-md shadow-lg w-48 py-1">
+                    <div className="px-3 py-2 border-b border-github-border">
+                      <h4 className="text-sm font-medium text-white">Filter by status</h4>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto">
+                      {['concept', 'started', 'completed', 'abandonded'].map(status => (
                         <button
-                          key={category}
-                          onClick={() => handleCategoryToggle(category.toLowerCase())}
+                          key={status}
+                          onClick={() => handleStatusToggle(status)}
                           className="w-full px-3 py-2 flex items-center gap-2 hover:bg-github-fg/30 transition-colors"
                         >
                           <div className="w-4 h-4 flex items-center justify-center">
-                            {selectedCategories.includes(category.toLowerCase()) && <Check size={14} className="text-white" />}
+                            {selectedStatuses.includes(status) && <Check size={14} className="text-white" />}
                           </div>
-                          <span className="text-sm text-white">{category}</span>
+                          <div className="flex items-center gap-1.5 text-sm text-white">
+                            {getStatusIcon(status, 14)}
+                            <span>{getStatusText(status)}</span>
+                          </div>
                         </button>
-                      ))
+                      ))}
+                    </div>
+                    {selectedStatuses.length > 0 && (
+                      <div className="px-3 py-2 border-t border-github-border">
+                        <button
+                          onClick={() => setSelectedStatuses([])}
+                          className="text-xs text-github-text hover:text-white transition-colors"
+                        >
+                          Clear filter
+                        </button>
+                      </div>
                     )}
                   </div>
-                  {selectedCategories.length > 0 && (
-                    <div className="px-3 py-2 border-t border-github-border">
-                      <button
-                        onClick={() => setSelectedCategories([])}
-                        className="text-xs text-github-text hover:text-white transition-colors"
-                      >
-                        Clear filter
-                      </button>
-                    </div>
+                )}
+              </div>
+              
+              {/* Category dropdown */}
+              <div className="relative flex-grow sm:flex-grow-0" ref={categoryRef}>
+                <button
+                  onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
+                  className={cn(
+                    "w-full sm:w-auto flex items-center justify-between sm:justify-start gap-1 px-3 py-1.5 rounded-md text-sm border transition-colors",
+                    selectedCategories.length > 0 
+                      ? "bg-github-fg/70 border-github-border-hover text-white" 
+                      : "bg-github-input border-github-border text-github-text hover:text-white"
                   )}
-                </div>
+                >
+                  <span className="truncate">Category {selectedCategories.length > 0 && `(${selectedCategories.length})`}</span>
+                  <ChevronDown size={14} className={categoryDropdownOpen ? "rotate-180 flex-shrink-0" : "flex-shrink-0"} />
+                </button>
+                
+                {categoryDropdownOpen && (
+                  <div className="absolute top-full left-0 z-10 mt-1 bg-github-card border border-github-border rounded-md shadow-lg w-48 py-1">
+                    <div className="px-3 py-2 border-b border-github-border">
+                      <h4 className="text-sm font-medium text-white">Filter by category</h4>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto">
+                      {allCategories.length === 0 ? (
+                        <div className="px-3 py-2 text-sm text-github-text">No categories found</div>
+                      ) : (
+                        allCategories.map(category => (
+                          <button
+                            key={category}
+                            onClick={() => handleCategoryToggle(category.toLowerCase())}
+                            className="w-full px-3 py-2 flex items-center gap-2 hover:bg-github-fg/30 transition-colors"
+                          >
+                            <div className="w-4 h-4 flex items-center justify-center">
+                              {selectedCategories.includes(category.toLowerCase()) && <Check size={14} className="text-white" />}
+                            </div>
+                            <span className="text-sm text-white">{category}</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                    {selectedCategories.length > 0 && (
+                      <div className="px-3 py-2 border-t border-github-border">
+                        <button
+                          onClick={() => setSelectedCategories([])}
+                          className="text-xs text-github-text hover:text-white transition-colors"
+                        >
+                          Clear filter
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Clear filters button */}
+              {(selectedStatuses.length > 0 || selectedCategories.length > 0 || selectedTags.length > 0) && (
+                <button
+                  onClick={() => {
+                    setSelectedStatuses([]);
+                    setSelectedCategories([]);
+                    setSelectedTags([]);
+                  }}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-md text-sm border border-github-border text-github-text hover:text-white transition-colors"
+                >
+                  <X size={14} /> Clear
+                </button>
               )}
             </div>
             
-            {/* Active filters display */}
-            {(selectedStatuses.length > 0 || selectedCategories.length > 0 || selectedTags.length > 0) && (
-              <button
-                onClick={() => {
-                  setSelectedStatuses([]);
-                  setSelectedCategories([]);
-                  setSelectedTags([]);
-                }}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-md text-sm border border-github-border text-github-text hover:text-white transition-colors"
-              >
-                <X size={14} /> Clear filters
-              </button>
-            )}
+            {/* Search input - expanded to full width */}
+            <div className="relative flex-grow">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-github-text" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search projects..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-github-border rounded-md bg-github-input text-github-text focus:outline-none focus:ring-1 focus:ring-github-blue focus:border-github-blue"
+              />
+            </div>
           </div>
           
           {/* Tags filter bar */}
@@ -428,13 +429,7 @@ export default function Projects() {
                 ? "Try adjusting your search or filters"
                 : "Start by creating your first project"}
             </p>
-            <button
-              onClick={() => setIsFormOpen(true)}
-              className="inline-flex items-center gap-1 px-4 py-2 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Project</span>
-            </button>
+            {/* New project button removed from empty state */}
           </div>
         ) : (
           <div className="bg-github-card border border-github-border rounded-md overflow-hidden">
@@ -442,7 +437,7 @@ export default function Projects() {
             <div className="border-b border-github-border px-4 py-3 bg-github-bg">
               <div className="grid grid-cols-12 gap-4 text-sm font-medium text-github-text">
                 <button 
-                  className="col-span-4 flex items-center gap-1 hover:text-white transition-colors" 
+                  className="col-span-5 flex items-center gap-1 hover:text-white transition-colors" 
                   onClick={() => handleSort('name')}
                 >
                   Project Name
@@ -475,7 +470,7 @@ export default function Projects() {
                   )} />
                 </button>
                 <button 
-                  className="col-span-2 flex items-center gap-1 hover:text-white transition-colors" 
+                  className="col-span-1 flex items-center gap-1 hover:text-white transition-colors" 
                   onClick={() => handleSort('priority')}
                 >
                   Priority
@@ -516,32 +511,12 @@ export default function Projects() {
                       className="block px-4 py-3 hover:bg-github-bg transition-colors"
                     >
                       <div className="grid grid-cols-12 gap-4 items-center">
-                        <div className="col-span-4">
+                        <div className="col-span-5">
                           <h3 className="font-medium text-white">{project.name}</h3>
                           {project.description && (
                             <p className="text-github-text text-sm truncate">{project.description}</p>
                           )}
-                          
-                          {/* Enhanced tag display */}
-                          {project.tags && (
-                            <div className="flex flex-wrap gap-1 mt-1.5">
-                              {(typeof project.tags === 'string' 
-                                ? project.tags.split(',').map(tag => tag.trim()).filter(Boolean) 
-                                : project.tags.filter(Boolean)).map((tag, index) => (
-                                <span 
-                                  key={index} 
-                                  className={cn(
-                                    "px-2 py-0.5 text-xs rounded-full border",
-                                    selectedTags.includes(tag)
-                                      ? "bg-github-blue/20 border-github-blue/40 text-github-blue"
-                                      : "bg-github-tag/20 border-github-tag-border text-github-tag-text"
-                                  )}
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                          {/* Tags removed from project list rows */}
                         </div>
                         <div className="col-span-2">
                           <div className="flex items-center gap-1.5">
@@ -558,23 +533,20 @@ export default function Projects() {
                             <span className="text-sm text-github-text/50">-</span>
                           )}
                         </div>
-                        <div className="col-span-2">
+                        <div className="col-span-1">
                           {project.priority === 'high' && (
                             <div className="flex items-center gap-1">
                               <Star size={14} className="text-yellow-400" />
-                              <span className="text-sm text-github-text">High</span>
                             </div>
                           )}
                           {project.priority === 'medium' && (
                             <div className="flex items-center gap-1">
                               <Star size={14} className="text-github-text" />
-                              <span className="text-sm text-github-text">Medium</span>
                             </div>
                           )}
                           {project.priority === 'low' && (
                             <div className="flex items-center gap-1">
                               <Star size={14} className="text-github-text/50" />
-                              <span className="text-sm text-github-text">Low</span>
                             </div>
                           )}
                           {!project.priority && (
@@ -582,10 +554,8 @@ export default function Projects() {
                           )}
                         </div>
                         <div className="col-span-2">
-                          <div className="flex items-center gap-1.5">
-                            <Calendar size={14} className="text-github-text" />
-                            <span className="text-sm text-github-text">{formatDate(project.created_at)}</span>
-                          </div>
+                          {/* Calendar icon removed */}
+                          <span className="text-sm text-github-text">{formatDate(project.created_at)}</span>
                         </div>
                       </div>
                     </Link>

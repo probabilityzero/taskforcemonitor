@@ -9,7 +9,8 @@ import {
   PlayCircle,
   CheckCircle,
   Flag,
-  ExternalLink
+  ExternalLink,
+  ArrowUpRight
 } from 'lucide-react';
 import type { Project, ProjectStatus } from '../types';
 import { cn } from '../lib/utils';
@@ -143,7 +144,7 @@ function ProjectCard({
           
           <div className="flex items-center justify-between text-github-text text-xs">
             <span className="flex items-center gap-1">
-              <Calendar size={12} /> {formatDate(project.created_at)}
+             {formatDate(project.created_at)}
             </span>
             
             <div className="flex items-center gap-3">
@@ -156,7 +157,7 @@ function ProjectCard({
                   onClick={handleExternalLinkClick}
                   className="text-github-blue hover:text-github-blue/80 transition-colors flex items-center gap-0.5"
                 >
-                  Visit <ExternalLink size={10} />
+                  Visit <ArrowUpRight size={10} /> | 
                 </a>
               )}
               

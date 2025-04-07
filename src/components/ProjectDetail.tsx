@@ -258,9 +258,31 @@ function ProjectDetail({
 
   const detailContent = (
     <div className="p-4 sm:p-6 md:p-8 flex flex-col h-full" onClick={handleContentClick}>
+      {/* Header with buttons moved to top right */}
       <div className="flex justify-between items-start mb-6">
         <h2 className="text-xl font-bold text-white flex-1">{project.name}</h2>
         <div className="flex items-center gap-2">
+          {/* Share button moved to top */}
+          <button 
+            className="px-2.5 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded-md transition-colors flex items-center gap-1 text-sm"
+            onClick={handleShareProject}
+            disabled={isSubmitting}
+          >
+            <Share2 size={14} /> Share
+          </button>
+          
+          {/* Edit button moved to top */}
+          {onEdit && (
+            <button 
+              className="px-2.5 py-1 bg-github-fg hover:bg-github-fg/80 text-white rounded-md transition-colors flex items-center gap-1 text-sm"
+              onClick={onEdit}
+              disabled={isSubmitting}
+            >
+              <Edit size={14} /> Edit
+            </button>
+          )}
+          
+          {/* Close button */}
           <button 
             className="text-github-text hover:text-white transition-colors"
             onClick={handleCloseAndGoBack}
@@ -274,7 +296,14 @@ function ProjectDetail({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Description - takes 2/3 of the width */}
         <div className="bg-github-fg rounded-md p-4 border border-github-border md:col-span-2">
-          <h3 className="text-github-text text-sm mb-2">Description</h3>
+          <div className="flex justify-between mb-2">
+            <h3 className="text-github-text text-sm">Description</h3>
+            {/* Priority moved to top right of description */}
+            <div className="flex items-center gap-1">
+              {getPriorityIcon(project.priority)}
+              <span className="text-github-text text-sm">{project.priority || 'Low'} priority</span>
+            </div>
+          </div>
           <p className="text-white text-sm whitespace-pre-wrap">
             {project.description || "No description provided"}
           </p>
@@ -470,16 +499,28 @@ function ProjectDetail({
         )}
       </div>
 
-      {/* Details Section - moved to the bottom */}
+      {/* Details Section - with reorganized content */}
       <div className="bg-github-fg rounded-md p-4 border border-github-border mb-4">
-        <div className="flex justify-between mb-2">
-          <h3 className="text-github-text text-sm">Details</h3>
-          <div className="flex items-center gap-1">
-            {getPriorityIcon(project.priority)}
-            <span className="text-github-text text-sm">{project.priority || 'Low'} priority</span>
-          </div>
-        </div>
+        <h3 className="text-github-text text-sm mb-2">Details</h3>
 
+        {/* Tags moved above dates */}
+        {tagsList.length > 0 && (
+          <div className="mb-3">
+            <h4 className="text-github-text text-xs mb-1">Tags</h4>
+            <div className="flex flex-wrap gap-1">
+              {tagsList.map((tag, index) => (
+                <span 
+                  key={index} 
+                  className="bg-github-tag/20 text-github-tag-text text-xs px-2 py-0.5 rounded-full border border-github-tag-border"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Dates */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm text-github-text">
             <Calendar size={14} /> Created: {formatDate(project.created_at)}
@@ -492,44 +533,9 @@ function ProjectDetail({
             </div>
           )}
         </div>
-
-        {tagsList.length > 0 && (
-          <div className="mt-3">
-            <h4 className="text-github-text text-xs mb-1">Tags</h4>
-            <div className="flex flex-wrap gap-1">
-              {tagsList.map((tag, index) => (
-                <span 
-                  key={index} 
-                  className="bg-github-tag text-github-tag-text text-xs px-2 py-0.5 rounded-md"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Action buttons */}
-      <div className="flex justify-end gap-3 mt-auto">
-        <button 
-          className="px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white rounded-md transition-colors flex items-center gap-1"
-          onClick={handleShareProject}
-          disabled={isSubmitting}
-        >
-          <Share2 size={14} /> Share
-        </button>
-        
-        {onEdit && (
-          <button 
-            className="px-3 py-1.5 bg-github-fg hover:bg-github-fg/80 text-white rounded-md transition-colors flex items-center gap-1"
-            onClick={onEdit}
-            disabled={isSubmitting}
-          >
-            <Edit size={14} /> Edit
-          </button>
-        )}
-      </div>
+      {/* Action buttons were here - now moved to top */}
 
       {/* Share Modal */}
       {isShareModalOpen && (
