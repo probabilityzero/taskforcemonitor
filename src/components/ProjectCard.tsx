@@ -8,7 +8,8 @@ import {
   Lightbulb,
   PlayCircle,
   CheckCircle,
-  Flag
+  Flag,
+  ExternalLink
 } from 'lucide-react';
 import type { Project, ProjectStatus } from '../types';
 import { cn } from '../lib/utils';
@@ -93,6 +94,10 @@ function ProjectCard({
     setIsDetailModalOpen(true);
   };
 
+  const handleExternalLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+  };
+
   return (
     <>
       <motion.div
@@ -128,7 +133,7 @@ function ProjectCard({
               {tagsList.map((tag, index) => (
                 <span 
                   key={index} 
-                  className="bg-github-tag text-github-tag-text text-xs px-2 py-0.5 rounded-md"
+                  className="bg-github-tag/20 text-github-tag-text text-xs px-2 py-0.5 rounded-full border border-github-tag-border"
                 >
                   {tag}
                 </span>
@@ -141,12 +146,27 @@ function ProjectCard({
               <Calendar size={12} /> {formatDate(project.created_at)}
             </span>
             
-            <button 
-              className="text-github-text hover:text-white transition-colors flex items-center gap-0.5"
-              onClick={handleOpenDetail}
-            >
-              Details <ChevronRight size={12} />
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Visit link button - only shows if project has a link */}
+              {project.link && (
+                <a 
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleExternalLinkClick}
+                  className="text-github-blue hover:text-github-blue/80 transition-colors flex items-center gap-0.5"
+                >
+                  Visit <ExternalLink size={10} />
+                </a>
+              )}
+              
+              <button 
+                className="text-github-text hover:text-white transition-colors flex items-center gap-0.5"
+                onClick={handleOpenDetail}
+              >
+                Details <ChevronRight size={12} />
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -154,7 +174,7 @@ function ProjectCard({
       {/* Detail Modal */}
       <AnimatePresence>
         {isDetailModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/50 flex justify-end overflow-hidden" onClick={() => setIsDetailModalOpen(false)}>
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex justify-end overflow-hidden" onClick={() => setIsDetailModalOpen(false)}>
             <ProjectDetail 
               project={project}
               isModal={true}

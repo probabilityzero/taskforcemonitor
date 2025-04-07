@@ -193,7 +193,7 @@ function HomePage() {
   }, [setGlobalFormOpen]);
 
   return (
-    <div className={cn("flex-1", isBlurBackground ? "overflow-hidden" : "")}>
+    <div className={cn( isBlurBackground ? "overflow-hidden" : "")}>
       <div className="max-w-screen-lg mx-auto px-4 sm:px-6 md:px-8 py-3 sm:py-4 md:py-6 w-full">
         <div className="mb-3 md:mb-4">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-2">

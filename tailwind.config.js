@@ -31,6 +31,12 @@ export default {
         'github-active-nav': '#0d1117',
         'github-avatar-bg': '#40464e',
         'github-header-secondary': '#0d1017', // Add this new color
+        'github-tag': {
+          DEFAULT: 'rgb(36, 41, 47)',
+          'text': 'rgb(201, 209, 217)',
+          'border': 'rgba(201, 209, 217, 0.2)'
+        },
+        'github-blue': '#58a6ff',
       },
       backgroundSize: {
         'google-auth-gradient': '400% 400%',
