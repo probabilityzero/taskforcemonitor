@@ -4,12 +4,10 @@ import {
   User, 
   Menu, 
   X, 
-  Bell, 
   LogOut,
   ChevronDown,
   Book,
   Settings,
-  Github,
   Home
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -75,8 +73,8 @@ export function Header({ user, onCreateNew, minimal = false }: HeaderProps) {
           <div className="flex items-center flex-shrink-0">
             <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2">
               <img 
-                src="/assets/logo.svg" 
-                alt="Task Force Monitor Logo" 
+                src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg"
+                alt="Task Force Monitor" 
                 className="w-7 h-7" 
               />
               {!minimal && (

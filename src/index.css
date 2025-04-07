@@ -93,3 +93,32 @@ select {
   border: 1px solid #30363d;
   pointer-events: none;
 }
+
+/* Add this to your global CSS file */
+#youtube-player {
+  pointer-events: none;
+}
+
+#youtube-player iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 100vh;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+@media (min-aspect-ratio: 16/9) {
+  #youtube-player iframe {
+    /* height is greater compared to the aspect ratio */
+    height: 56.25vw;
+  }
+}
+
+@media (max-aspect-ratio: 16/9) {
+  #youtube-player iframe {
+    /* width is greater compared to the aspect ratio */
+    width: 177.78vh;
+  }
+}

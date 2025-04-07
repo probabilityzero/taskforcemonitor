@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowRight, 
@@ -42,7 +42,66 @@ const features = [
 export default function WelcomePage() {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const playerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // Load YouTube IFrame API
+  useEffect(() => {
+    // Only load the YouTube API if it hasn't been loaded already
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+      
+      // Set up callback for when API is ready
+      window.onYouTubeIframeAPIReady = initializePlayer;
+    } else {
+      // If the API is already loaded, initialize the player directly
+      initializePlayer();
+    }
+
+    return () => {
+      // Clean up the global callback when component unmounts
+      window.onYouTubeIframeAPIReady = null;
+    };
+  }, []);
+
+  const initializePlayer = () => {
+    if (playerRef.current && window.YT) {
+      new window.YT.Player(playerRef.current, {
+        videoId: 'ez471e1d1Ec', // Your YouTube video ID
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          iv_load_policy: 3,
+          loop: 1,
+          modestbranding: 1,
+          playsinline: 1,
+          rel: 0,
+          showinfo: 0,
+          mute: 1, // Make sure the video is muted
+          playlist: 'ez471e1d1Ec', // Needed for looping
+        },
+        events: {
+          onReady: (event) => {
+            event.target.mute(); // Ensure muted
+            event.target.playVideo();
+            setVideoLoaded(true);
+          },
+          onStateChange: (event) => {
+            // If video ends, restart it to maintain the loop
+            if (event.data === window.YT.PlayerState.ENDED) {
+              event.target.playVideo();
+            }
+          }
+        }
+      });
+    }
+  };
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -76,8 +135,8 @@ export default function WelcomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
           <div className="flex items-center">
             <img 
-              src="/assets/logo.svg" 
-              alt="Task Force Monitor Logo" 
+              src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg"
+              alt="Task Force Monitor" 
               className="w-8 h-8 mr-2" 
             />
             <h1 className="text-xl font-bold text-github-text">Task Force <span className="font-thin">Monitor</span></h1>
@@ -94,8 +153,25 @@ export default function WelcomePage() {
         </div>
       </header>
 
+      {/* Video Background */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-black/80 z-10"></div> {/* Overlay to darken the video */}
+        <div 
+          className={cn(
+            "absolute inset-0 w-full h-full transition-opacity duration-1000", 
+            videoLoaded ? "opacity-100" : "opacity-0"
+          )}
+        >
+          <div 
+            ref={playerRef}
+            className="w-full h-full scale-[1.5] transform-gpu"
+            id="youtube-player"
+          />
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <main>
+      <main className="relative z-[1]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
             {/* Left column - Text content */}
@@ -140,7 +216,7 @@ export default function WelcomePage() {
                 {features.map((feature, index) => (
                   <motion.div
                     key={index}
-                    className="bg-github-card p-5 rounded-lg border border-github-border"
+                    className="bg-github-card/80 backdrop-blur-sm p-5 rounded-lg border border-github-border"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 + index * 0.1, duration: 0.3 }}
@@ -166,7 +242,7 @@ export default function WelcomePage() {
                   compact={true} 
                   showWelcomeText={false}
                   onSuccess={onAuthSuccess}
-                  className="mb-5"
+                  className="my-5 backdrop-blur-sm bg-github-card/80"
                 />
                 <div className="text-center text-github-text text-sm">
                   By signing up, you agree to our <a href="/terms" className="text-github-blue hover:text-white">Terms of Service</a> and <a href="/privacy" className="text-github-blue hover:text-white">Privacy Policy</a>.
@@ -180,58 +256,66 @@ export default function WelcomePage() {
         <div className="w-full h-px bg-gradient-to-r from-transparent via-github-border to-transparent my-20"></div>
 
         {/* How it works section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">How Task Force Monitor Works</h2>
-            <p className="text-xl text-github-text max-w-3xl mx-auto">
-              Our powerful but simple workflow helps you manage all your projects efficiently
-            </p>
-          </motion.div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
+          {/* Background for this section */}
+          <div className="absolute inset-0 bg-github-bg/70 backdrop-blur-md"></div>
+          
+          <div className="relative">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">How Task Force Monitor Works</h2>
+              <p className="text-xl text-github-text max-w-3xl mx-auto">
+                Our powerful but simple workflow helps you manage all your projects efficiently
+              </p>
+            </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <Lightbulb size={32} />,
-                title: "Capture Ideas",
-                description: "Save all your project ideas before they fade away. Categorize and tag them for easy reference."
-              },
-              {
-                icon: <GitBranchPlus size={32} />,
-                title: "Track Progress",
-                description: "Move projects from concept to completion. Never lose track of what you're working on."
-              },
-              {
-                icon: <Zap size={32} />,
-                title: "Boost Productivity",
-                description: "Focus on what matters. Prioritize your projects and complete more of them."
-              }
-            ].map((step, index) => (
-              <motion.div
-                key={index}
-                className="bg-github-card border border-github-border rounded-lg p-6 flex flex-col items-center text-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + index * 0.1, duration: 0.3 }}
-              >
-                <div className="bg-github-border/40 p-4 rounded-full mb-5 text-github-green">
-                  {step.icon}
-                </div>
-                <h3 className="text-xl font-medium text-white mb-3">{step.title}</h3>
-                <p className="text-github-text">{step.description}</p>
-              </motion.div>
-            ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Your existing workflow steps */}
+              {[
+                {
+                  icon: <Lightbulb size={32} />,
+                  title: "Capture Ideas",
+                  description: "Save all your project ideas before they fade away. Categorize and tag them for easy reference."
+                },
+                {
+                  icon: <GitBranchPlus size={32} />,
+                  title: "Track Progress",
+                  description: "Move projects from concept to completion. Never lose track of what you're working on."
+                },
+                {
+                  icon: <Zap size={32} />,
+                  title: "Boost Productivity",
+                  description: "Focus on what matters. Prioritize your projects and complete more of them."
+                }
+              ].map((step, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-github-card/80 backdrop-blur-sm border border-github-border rounded-lg p-6 flex flex-col items-center text-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + index * 0.1, duration: 0.3 }}
+                >
+                  <div className="bg-github-border/40 p-4 rounded-full mb-5 text-github-green">
+                    {step.icon}
+                  </div>
+                  <h3 className="text-xl font-medium text-white mb-3">{step.title}</h3>
+                  <p className="text-github-text">{step.description}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* CTA Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
+          <div className="absolute inset-0 bg-github-bg/90 backdrop-blur-md"></div>
+          
           <motion.div
-            className="bg-github-card border border-github-border rounded-lg p-8 md:p-12 text-center"
+            className="bg-github-card/80 backdrop-blur-sm border border-github-border rounded-lg p-8 md:p-12 text-center relative"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
