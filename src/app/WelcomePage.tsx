@@ -214,27 +214,11 @@ export default function WelcomePage() {
             className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setShowAuthForm(false)}
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-github-card border border-github-border rounded-lg shadow-xl p-6 w-full max-w-md"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="mb-6 flex justify-center">
-                <img 
-                  src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg" 
-                  alt="Task Force Monitor" 
-                  className="w-10 h-10"
-                />
-              </div>
-              
-              <AuthForm 
-                initialMode={authMode} 
-                onSuccess={onAuthSuccess}
-                onClose={() => setShowAuthForm(false)}
-              />
-            </motion.div>
+            <AuthForm 
+            initialMode={authMode} 
+            onSuccess={onAuthSuccess}
+            onClose={() => setShowAuthForm(false)}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -243,7 +227,7 @@ export default function WelcomePage() {
       <main className="relative z-[1]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
           {/* Updated hero layout */}
-          <div className="w-full lg:w-1/2 mx-auto">
+          <div className="w-full lg:w-2/3 ml-auto">
             {/* Hero content */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -269,15 +253,6 @@ export default function WelcomePage() {
                     className="flex items-center gap-2 px-6 py-3 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-lg"
                   >
                     Get Started <ArrowRight />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setAuthMode('login');
-                      setShowAuthForm(true);
-                    }}
-                    className="flex items-center gap-2 px-6 py-3 bg-github-card border border-github-border text-github-text hover:text-white rounded-md transition-colors text-lg"
-                  >
-                    Sign In <LogIn size={18} />
                   </button>
                 </div>
               ) : (
@@ -398,16 +373,7 @@ export default function WelcomePage() {
                   }}
                   className="flex items-center gap-2 px-8 py-4 bg-github-green hover:bg-github-green-hover text-white rounded-md transition-colors text-lg"
                 >
-                  Sign Up Free <ChevronRight />
-                </button>
-                <button
-                  onClick={() => {
-                    setAuthMode('login');
-                    setShowAuthForm(true);
-                  }}
-                  className="flex items-center gap-2 px-8 py-4 bg-github-card border border-github-border text-github-text hover:text-white rounded-md transition-colors text-lg"
-                >
-                  Sign In <LogIn size={18} />
+                  Get Started <ChevronRight />
                 </button>
               </div>
             ) : (

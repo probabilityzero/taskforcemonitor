@@ -163,7 +163,7 @@ export function Header({
       {user && !minimal && (
         <div className="hidden md:block border-t border-github-border bg-github-header-secondary">
           <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-10">
+            <div className="flex items-end justify-start h-10">
               {/* Navigation links with icons and orange underline */}
               <div className="flex items-center space-x-1">
                 <Link 
@@ -176,7 +176,7 @@ export function Header({
                   )}
                 >
                   <LayoutDashboard size={14} />
-                  <span>Dashboard</span>
+                  <span>Overview</span>
                   {location.pathname === '/dashboard' && (
                     <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500"></div>
                   )}
@@ -213,13 +213,6 @@ export function Header({
                     <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500"></div>
                   )}
                 </Link>
-              </div>
-
-              {/* Page title area - can be used to show current page name */}
-              <div className="text-sm text-github-text font-medium">
-                {location.pathname === '/dashboard' && 'Home Dashboard'}
-                {location.pathname === '/timeline' && 'Activity Timeline'}
-                {location.pathname === '/projects' && 'All Projects'}
               </div>
             </div>
           </div>
