@@ -157,7 +157,7 @@ function ProjectCard({
                   onClick={handleExternalLinkClick}
                   className="text-github-blue hover:text-github-blue/80 transition-colors flex items-center gap-0.5"
                 >
-                  Visit <ArrowUpRight size={10} /> | 
+                  Visit <ArrowUpRight size={10} />
                 </a>
               )}
               
