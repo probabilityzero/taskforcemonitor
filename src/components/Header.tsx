@@ -122,35 +122,37 @@ export function Header({
       {/* Top row - Logo, New button, and Profile */}
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
-          {/* Logo - Positioned to the left and improved sizing */}
-          <div className="flex items-center flex-shrink-0">
+          {/* Logo section with menu button for mobile */}
+          <div className="flex items-center">
+            {/* Mobile menu button - moved to the left */}
+            <div className="flex md:hidden mr-3">
+              <button
+                className="text-github-text hover:text-white transition-colors"
+                onClick={(e) => {
+                  stopPropagation(e);
+                  setIsMenuOpen(!isMenuOpen);
+                }}
+              >
+                {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
+            
+            {/* Logo with redesigned text styling */}
             <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2">
               <img 
                 src="https://raw.githubusercontent.com/probabilityzero/cloudstorage/refs/heads/main/taskforcemonitor.svg"
                 alt="Task Force Monitor" 
                 className="w-6 h-6" 
               />
-              <h1 className="text-lg font-semibold text-github-text hidden xs:block">
-                Task Force <span className="font-thin ml-1.5">Monitor</span>
-              </h1>
+              <div className="text-lg hidden xs:flex items-baseline">
+                <span className="font-light text-github-text">Task Force</span>
+                <span className="font-semibold text-white ml-1.5">Monitor</span>
+              </div>
             </Link>
           </div>
           
-          {/* Mobile menu button - moved to the right */}
-          <div className="flex md:hidden ml-auto">
-            <button
-              className="text-github-text hover:text-white transition-colors ml-2"
-              onClick={(e) => {
-                stopPropagation(e);
-                setIsMenuOpen(!isMenuOpen);
-              }}
-            >
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
-
           {/* Right side buttons - visible on all sizes */}
-          <div className="flex items-center gap-2 ml-2 md:ml-0">
+          <div className="flex items-center gap-2 ml-auto">
             {user && !minimal && (
               <button
                 onClick={handleCreateNew}
@@ -274,9 +276,10 @@ export function Header({
                   alt="Task Force Monitor" 
                   className="w-6 h-6 mr-2" 
                 />
-                <h1 className="text-sm font-semibold text-github-text">
-                  Task Force <span className="font-thin">Monitor</span>
-                </h1>
+                <div className="flex items-baseline">
+                  <span className="text-sm font-light text-github-text">Task Force</span>
+                  <span className="text-sm font-semibold text-white ml-1">Monitor</span>
+                </div>
               </div>
               <button
                 className="text-github-text hover:text-white transition-colors"

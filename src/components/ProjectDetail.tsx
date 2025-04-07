@@ -512,16 +512,15 @@ function ProjectDetail({
   // If used as a standalone page
   if (!isModal) {
     return (
-      <div className="max-w-4xl mx-auto py-6 px-4 h-full">
+      <div className="max-w-4xl mx-auto py-6 px-4 h-full overflow-y-auto">
         {detailContent}
       </div>
     );
   }
 
-  // If used as a modal
   return (
     <motion.div 
-      className="bg-github-card border-l border-github-border h-full overflow-y-auto md:w-2/3 lg:1/2 w-full"
+      className="bg-github-card border-l border-github-border h-full overflow-y-auto md:w-2/3 lg:w-1/2 w-full"
       initial={{ x: "100%" }}
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
