@@ -259,11 +259,11 @@ function HomePage() {
                     : "bg-github-card text-github-text border-github-border hover:border-github-green"
                 )}
               >
-                <Archive 
+                <LucideIcons.Archive
                   size={14} 
                   className={!showArchive ? "text-github-text" : undefined}
                 />
-                <span>Archive</span>
+                <span>Archive</span> 
               </button>
             </div>
 
