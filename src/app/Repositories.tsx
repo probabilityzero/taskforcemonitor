@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Header } from '../components/Header';
 import { ProjectForm } from '../components/ProjectForm';
 import { motion } from 'framer-motion';
 import { 
@@ -17,7 +16,6 @@ import {
   ArrowRight,
   CheckCircle2
 } from 'lucide-react';
-import { cn } from '../lib/utils';
 import type { Project, ProjectStatus } from '../types';
 
 interface Repository {
@@ -263,10 +261,7 @@ function Repositories() {
 
   return (
     <div className="min-h-screen bg-github-bg flex flex-col">
-      <Header 
-        user={user} 
-        minimal={false} 
-      />
+
       
       {isFormOpen && selectedRepo && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">

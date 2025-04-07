@@ -190,7 +190,7 @@ function HomePage() {
                 className={cn(
                   "px-3 py-1.5 rounded-md text-xs md:text-sm border transition-colors",
                   selectedCategory === 'all'
-                    ? "bg-github-green text-white border-github-green" 
+                    ? "bg-github-green  border-2 text-white border-github-green" 
                     : "bg-github-card text-github-text border-github-border hover:border-github-green"
                 )}
               >
@@ -326,6 +326,28 @@ function HomePage() {
                     onClick={() => {
                       setEditingProject(project);
                       setIsFormOpen(true);
+                    }}
+                    setToast={setToast}
+                    onStatusChange={async (project, newStatus) => {
+                      try {
+                        const { error } = await supabase
+                          .from('projects')
+                          .update({ status: newStatus })
+                          .eq('id', project.id);
+                          
+                        if (error) throw error;
+                        
+                        setToast(`Project status updated to ${
+                          newStatus === 'completed' ? 'Completed' : 
+                          newStatus === 'started' ? 'In Progress' : 
+                          newStatus === 'abandonded' ? 'Abandoned' : 'Concept'
+                        }`);
+                        
+                        // Refresh projects
+                        fetchProjects();
+                      } catch (error: any) {
+                        setToast(`Error: ${error.message}`);
+                      }
                     }}
                   />
                 </motion.div>
